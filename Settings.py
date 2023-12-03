@@ -1,9 +1,6 @@
 import pygame
 from random import *
 from operator import attrgetter
-
-pygame.init()
-font = pygame.font.SysFont('Consolas',30)
 # Game size
 GAME_WIDTH, GAME_HEIGHT = 1280, 550
 GAME_X, GAME_Y = 0, 170

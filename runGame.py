@@ -1,12 +1,12 @@
 import pygame
-from newsettings import *
+from Settings import *
 from sys import exit
 
 #components
-from newgame import Game
+from Game import Game
 
+class runGame():
 
-class Main:
     def __init__(self):
 
         # general
@@ -16,8 +16,13 @@ class Main:
         self.clock = pygame.time.Clock()
 
         # components
-        
         self.game = Game()
+        self.state = False
+
+        # Data for next feature
+        self.cars_name = []
+        
+      
 
     def run(self):
         while True:
@@ -27,11 +32,13 @@ class Main:
                     exit()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    
+                    self.game.mouse_sound.play()
 
                     # Choose your map
                     if self.game.chose_map == False:
                         for i in range(MAPS):
-                            if self.game.maps_list[i].collidepoint(event.pos):
+                            if self.game.maps_rect_list[i].collidepoint(event.pos):
                                 self.game.map = i + 1
 
                     # Choose your car
@@ -45,7 +52,6 @@ class Main:
                         for k in range(len(self.game.coins_rect_list)):
                             if self.game.coins_rect_list[k].collidepoint(event.pos):
                                 self.game.coin = (k + 1) * 1000
-
 
                 if event.type == pygame.KEYDOWN:
 
@@ -63,9 +69,7 @@ class Main:
                             if len(self.game.cars_name_list[self.game.current_opponent]) == 0:
                                 self.game.cars_name_list[self.game.current_opponent] = choice(self.game.Name)
                                 self.game.Name.remove(self.game.cars_name_list[self.game.current_opponent])
-                            
 
-                        
                             self.game.name_x += (GAME_WIDTH - 280) / (CARS - 1)
 
                             self.game.current_opponent += 1
@@ -79,12 +83,22 @@ class Main:
                             self.game.cars_name_list[self.game.current_opponent] += event.unicode
 
                     if self.game.changed_opponents and self.game.changed_name == False:
-
                         if self.game.enter:
                             self.game.changed_name = True
 
-            self.game.run()
+            if self.game.chose_coin == False:
+                self.game.run()
+            else:
+                self.state = True
+                self.cars_name = self.game.cars_name_list
+                
+                break
+
+            
+
+            # draw game cursor
+            self.game.cursor_img_rect = pygame.mouse.get_pos()
+            self.display_surface.blit(self.game.cursor_img, self.game.cursor_img_rect)
+
             pygame.display.update()
             self.clock.tick(60)
-
-Main().run()

@@ -1,13 +1,10 @@
 import pygame
 from random import randint, choice
 from operator import attrgetter
-from newsettings import font
 
 pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
-clock = pygame.time.Clock()
-pygame.display.set_caption('Us88')
-text = ["A. Thien An", "B. Phuong Chi", "C. Gia Bao", "D. Hai Ho", "E. Hai Le"]
+font = pygame.font.SysFont('Consolas',30)
 
 normal1_1 = ['cars/AS87/AS87_1.png', 'cars/NA4/NA4_1.png', 'cars/NA5/NA5_1.png', 'cars/NA6/NA6_1.png', 'cars/NA2/NA2_1.png']
 normal1_2 = ['cars/AS87/AS87_2.png', 'cars/NA4/NA4_2.png', 'cars/NA5/NA5_2.png', 'cars/NA6/NA6_2.png', 'cars/NA2/NA2_2.png']
@@ -98,7 +95,6 @@ class Car():
         self.rect.right += (self.check_buff() - self.screen_speed)
         if(self.rect.right >= 1280):
             self.rect.right = 1280
-            # print(leaderboard.ranking[0])
             if self.final_rank1 == 0:
                 self.final_rank1 = self.final_rank2
                 self.final_rank2 -= 1
@@ -152,15 +148,11 @@ class Mystery(pygame.sprite.Sprite):
         self.move(screen_speed)
 
     
-
-# mystery_list = pygame.sprite.Group()
-# for i in range(5):
-#     mystery_list.add(Mystery(i * 100 + 245))
-
-
 class Leaderboard():
-    def __init__(self):
+    def __init__(self, cars_name):
         self.ranking = []
+        self.cars_name = cars_name
+        
     
     def append(self, car):
         self.ranking.append(car)
@@ -172,20 +164,24 @@ class Leaderboard():
         self.sort()
         if self.ranking:
             for i in range(5):
-                text_surf = font.render(f'{text[self.ranking[i].order]}',False,'Red')
+                text_surf = font.render(f'{self.cars_name[self.ranking[i].order]}',False,'Red')
                 text_rect = text_surf.get_rect(topright = (1280,i*35))
                 screen.blit(text_surf, text_rect)
-
+                
 
 class Racing():
-    def __init__(self):
+    def __init__(self, cars_name):
 
         self.final_rank = 5 
         self.screen_speed = 5
         self.start_time = 0
         self.current_time = 0
 
-        self.leaderboard = Leaderboard()
+        
+        self.cars_name = cars_name
+        
+
+        self.leaderboard = Leaderboard(self.cars_name)
         
 
         self.car1 = Car(0,1, self.leaderboard, self.screen_speed, self.final_rank)
@@ -211,30 +207,20 @@ class Racing():
         time_rect = time_surf.get_rect(topleft = (0,0))
         screen.blit(time_surf, time_rect)
 
-    def run(self):
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-            screen.fill((0,0,0))
-            self.display_time()
-            self.mystery_list.draw(screen)
-            self.mystery_list.update(self.car1,self.screen_speed)
-            self.mystery_list.update(self.car2,self.screen_speed)
-            self.mystery_list.update(self.car3,self.screen_speed)
-            self.mystery_list.update(self.car4,self.screen_speed)
-            self.mystery_list.update(self.car5,self.screen_speed)
-            self.leaderboard.update()
-            self.car1.update()
-            self.car2.update()
-            self.car3.update()
-            self.car4.update()
-            self.car5.update()
-            pygame.display.update()
-            clock.tick(60)
-
-
-
-
+    def run(self):           
+        self.display_time()
+        self.mystery_list.draw(screen)
+        self.mystery_list.update(self.car1,self.screen_speed)
+        self.mystery_list.update(self.car2,self.screen_speed)
+        self.mystery_list.update(self.car3,self.screen_speed)
+        self.mystery_list.update(self.car4,self.screen_speed)
+        self.mystery_list.update(self.car5,self.screen_speed)
+        self.leaderboard.update()
+        self.car1.update()
+        self.car2.update()
+        self.car3.update()
+        self.car4.update()
+        self.car5.update()
+        
+        
 

@@ -1,14 +1,15 @@
-from newsettings import *
-from testgame import Car, Mystery, Leaderboard, Racing
+from Settings import *
 
 class Game:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.SysFont('Consolas', 30)
 
+        # Name for random choices
         self.Name = NAMES
 
-        self.maps_list = []
+        # List of maps' images, list of cars' images and cars' rect
+        self.maps_rect_list = []
         self.cars_image_list = []
         self.cars_rect_list = []
 
@@ -19,12 +20,19 @@ class Game:
         self.coins_rect_list = []
         self.coins_list = ['1000$', '2000$', '3000$', '4000$']
 
+        # cursor attributes
         self.mouse_pos = (0, 0)
+        self.mouse_sound = pygame.mixer.Sound('mouseclick1.mp3')
+        # pygame.mouse.set_visible(False)
+        self.cursor_img = pygame.image.load('normal.png')
+        self.cursor_img_rect = self.cursor_img.get_rect()
 
+        # the number of map, car and coin that user choose
         self.map = 0
         self.car = 0
         self.coin = 0
 
+        # the state of each def
         self.chose_map = False
         self.chose_car = False
         self.changed_name = False
@@ -32,24 +40,23 @@ class Game:
         self.displayed_information = False
         self.chose_coin = False
 
+        # the image of map and coin
         self.map_image = 0
         self.coin_image = 0
  
         self.enter = False
 
-        self.racing = Racing()
-
-    def run(self):
-
-        
-        if self.chose_coin:
-            self.racing.run()
-        else:
+    def run(self):        
+            
             self.list_maps()
             self.list_cars()
             self.change_name()
             self.bet_money()
-        # self.display_map()
+        
+    def display_cursor(self):
+        self.cursor_img_rect = pygame.mouse.get_pos()
+        self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
+
 
     def list_maps(self):       
 
@@ -62,9 +69,9 @@ class Game:
             self.display_surface.blit(text, text_rect)
 
             for i in range(1, MAPS + 1):
-                maps_image = pygame.transform.scale(pygame.image.load(f'maps/map{i}.jpg').convert_alpha(), (150, 150))
+                maps_image = pygame.transform.scale(pygame.image.load(f'maps/map{i}.jpg'), (150, 150)).convert_alpha()
                 maps_rect = maps_image.get_rect(center = (maps_x, 360))
-                self.maps_list.append(maps_rect)
+                self.maps_rect_list.append(maps_rect)
                 self.display_surface.blit(maps_image, maps_rect)
 
                 maps_x += (GAME_WIDTH - 280) / (MAPS - 1)
@@ -141,7 +148,6 @@ class Game:
 
     def bet_money(self):
         
-
         if self.changed_name and self.chose_coin == False:
 
             self.display_surface.fill((94,129,162))
@@ -152,7 +158,7 @@ class Game:
             self.display_surface.blit(text, text_rect)
            
             for i in range(1, COINS + 1):                
-                coins_image = pygame.transform.scale(pygame.image.load(f'coins/coin{i}.png').convert_alpha(), (150, 150))
+                coins_image = pygame.transform.scale(pygame.image.load(f'coins/coin{i}.png').convert_alpha(), (100, 80))
                 coins_rect = coins_image.get_rect(center = (coins_x, 360))
 
                 price_surface = self.font.render(self.coins_list[i - 1], True, (255, 255, 255))
@@ -167,8 +173,13 @@ class Game:
                 coins_x += (GAME_WIDTH - 280) / (COINS - 1)
 
         if self.coin > 0 and self.chose_coin == False:
-            # self.coin_image = pygame.image.load(f'coin{int(self.coin / 1000)}.png')
             self.chose_coin = True
+            
+
+    # def display_map(self):
+    #     self.display_surface.blit(pygame.transform.scale(pygame.image.load(f'maps/map{self.map}.jpg'), (1280, 720)), (0, 0))
+
+
 
 
 
