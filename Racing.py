@@ -6,7 +6,7 @@ from Settings import *
 pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
 pygame.display.set_caption('US88')
-font = pygame.font.SysFont('Consolas',30)
+font = pygame.font.SysFont('Consolas',20)
 
 normal1_1 = ['cars/AS87/AS87_1.png', 'cars/NA4/NA4_1.png', 'cars/NA5/NA5_1.png', 'cars/NA6/NA6_1.png', 'cars/NA2/NA2_1.png']
 normal1_2 = ['cars/AS87/AS87_2.png', 'cars/NA4/NA4_2.png', 'cars/NA5/NA5_2.png', 'cars/NA6/NA6_2.png', 'cars/NA2/NA2_2.png']
@@ -162,10 +162,11 @@ class Leaderboard():
     def __init__(self, cars_name):
         self.ranking = []
         self.cars_name = cars_name
-        
+        self.order = []
     
-    def append(self, car):
+    def append(self, car, i):
         self.ranking.append(car)
+        self.order.append(i)
     
     def sort(self):
         self.ranking = sorted(self.ranking, key = attrgetter('final_rank1', 'pos'), reverse = True)
@@ -173,14 +174,47 @@ class Leaderboard():
     def update(self):
         self.sort()
         if self.ranking:
-            maps_x = 140
+            maps_x = 50
 
-            # for i in range(5):
-            #     pygame.draw.rect(screen, 'White', (0, 0, 60, 40))
             for i in range(5):
-                text_surf = font.render(f'{self.cars_name[self.ranking[i].order]}',False,'Red')
-                text_rect = text_surf.get_rect(topright = (1280,i*35))
+                text_surf = font.render(f'Lane {i + 1}: ',False,'Red')
+                text_rect = text_surf.get_rect(midleft = (maps_x, 25))
                 screen.blit(text_surf, text_rect)
+                text_surf = font.render(f'{self.cars_name[i]}',False,'Red')
+                text_rect = text_surf.get_rect(midleft = (maps_x, 50))
+                screen.blit(text_surf, text_rect)
+                car_surf = pygame.image.load(f'{normal1_1[self.order[i]]}').convert_alpha()
+                car_surf = pygame.transform.scale(car_surf, (75, 50))
+                car_rect = car_surf.get_rect(topright = (maps_x + 200, 25))
+                screen.blit(car_surf, car_rect)
+                
+                maps_x += 250
+            
+
+            for j in range(5):
+                maps_x = 50 + self.ranking[j].order * 250
+                s = f'Rank: {j + 1}'
+                if j + 1 == 1:
+                    s = s + 'st'
+                elif j + 1 == 2:
+                    s = s + 'nd'
+                elif j + 1 == 3:
+                    s = s + 'rd'
+                else: s = s + 'th'
+                text_surf = font.render(s,False,'Red')
+                text_rect = text_surf.get_rect(midleft = (maps_x, 75))
+                screen.blit(text_surf, text_rect)
+                text_surf = font.render(f'Effect: {self.ranking[j].buff}',False,'Red')
+                text_rect = text_surf.get_rect(midleft = (maps_x, 100))
+                screen.blit(text_surf, text_rect)
+                text_surf = font.render(f'Current speed: {self.ranking[j].return_speed()}',False,'Red')
+                text_rect = text_surf.get_rect(midleft = (maps_x, 125))
+                screen.blit(text_surf, text_rect)
+
+
+
+
+                
 
 class Background():
     def __init__(self, map_number):
@@ -228,11 +262,11 @@ class Racing():
         
         
 
-        self.leaderboard.append(self.car1)
-        self.leaderboard.append(self.car2)
-        self.leaderboard.append(self.car3)
-        self.leaderboard.append(self.car4)
-        self.leaderboard.append(self.car5)
+        self.leaderboard.append(self.car1, 0)
+        self.leaderboard.append(self.car2, 1)
+        self.leaderboard.append(self.car3, 2)
+        self.leaderboard.append(self.car4, 3)
+        self.leaderboard.append(self.car5, 4)
 
         self.mystery_list = pygame.sprite.Group()
         for i in range(5):

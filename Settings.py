@@ -27,8 +27,8 @@ CARS = 5
 COINS = 4
 
 # NAME
-NAMES = ['Hawkeye', 'Black Widow', 'Daredevil', 'Storm', 'Black Panther', 'Scarlet Witch', 'Magneto', 'Deadpool', 'Captain America',
-         'Loki', 'Iron Man', 'Thanos', 'The Hulk', 'Wolverine', 'Spider-Man', 'Thor', 'Doctor Strange']
+NAMES = ['Hawkeye', 'Loki', 'Daredevil', 'Storm', 'Ultron', 'Groot', 'Magneto', 'Wanda', 'Wasp',
+         'Loki', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
 
 TEST_NAMES = ['Hawkeye', 'Black Widow', 'Daredevil', 'Storm', 'Black Panther']
 
