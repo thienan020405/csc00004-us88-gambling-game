@@ -245,6 +245,9 @@ class Background():
         self.racetrack_rect1 = self.racetrack_surf.get_rect(topleft = (0, 170))
         self.racetrack_rect2 = self.racetrack_surf.get_rect(topleft = (self.racetrack_surf.get_width(), 170))
     
+        self.fin_surf = pygame.image.load('finish_line.jpg').convert()
+        self.fin_rect = self.fin_surf.get_rect(bottomright = (WINDOW_WIDTH, WINDOW_HEIGHT))
+        
         self.max_pos = 0
         self.max_speed = 0
         self.count = 0
@@ -257,6 +260,7 @@ class Background():
         screen.blit(self.sky_surf, self.sky_rect2)
         screen.blit(self.racetrack_surf, self.racetrack_rect1)
         screen.blit(self.racetrack_surf, self.racetrack_rect2)
+        screen.blit(self.fin_surf, self.fin_rect)
 
 
 class Racing():
@@ -302,6 +306,7 @@ class Racing():
 
     def display_map(self):
         self.bg.update()
+
 
     def run(self):           
         self.display_map()
