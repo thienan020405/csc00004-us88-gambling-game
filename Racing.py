@@ -1,6 +1,7 @@
 import pygame
 from random import randint, choice
 from operator import attrgetter
+from Settings import *
 
 pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
@@ -17,7 +18,7 @@ winner = ['cars/AS87/winner.png', 'cars/NA4/winner.png', 'cars/NA5/winner.png', 
 set2 = ['xe6.png', 'xe7.png', 'xe8.png', 'xe9.png', 'xe10.png']
 
 class Car():
-    def __init__(self, i, map, leaderboard, screen_speed, final_rank):
+    def __init__(self, i, map, leaderboard, final_rank):
         self.order = i
         self.final_rank1 = 0
         self.final_rank2 = final_rank
@@ -26,7 +27,6 @@ class Car():
         self.start_time = 0
         self.buff = None
 
-        self.screen_speed = screen_speed
         self.leaderboard = leaderboard
         
         if map == 1:
@@ -38,11 +38,11 @@ class Car():
 
         self.rect = self.image.get_rect(midleft = (0, i * 100 + 245))
 
-        self.sta_speed = randint(5,10)
-        self.mid_speed1 = randint(15,20)
-        self.mid_speed2 = randint(24,28)
-        self.mid_speed3 = randint(25,28)
-        self.fin_speed = randint(25,30)
+        self.sta_speed = randint(1,5)
+        self.mid_speed1 = randint(5,10)
+        self.mid_speed2 = randint(5,10)
+        self.mid_speed3 = randint(7,13)
+        self.fin_speed = randint(8,15)
 
     def speed(self):
         if current_time <= 1:
@@ -103,7 +103,7 @@ class Car():
                 self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
         if self.buff == 'bua_di_lui': screen.blit(pygame.transform.flip(self.image, True, False), self.rect)
         else: screen.blit(self.image,self.rect)
-        self.rect.right += (self.check_buff() - self.screen_speed)
+        self.rect.right += (self.check_buff())
         if(self.rect.right >= 1280):
             self.rect.right = 1280
             if self.final_rank1 == 0:
@@ -121,10 +121,11 @@ class Car():
 
 
 class Mystery(pygame.sprite.Sprite):
-    def __init__(self, y_pos):
+    def __init__(self, x_pos, y_pos):
         super().__init__()
         self.image = pygame.image.load('mystery.png').convert_alpha()
-        self.rect = self.image.get_rect(midleft = (1080, y_pos))
+        self.image = pygame.transform.scale(self.image, (65, 65))
+        self.rect = self.image.get_rect(midleft = (x_pos, y_pos))
 
     def bua_tang_toc(self, car):
         car.buff = 'bua_tang_toc'
@@ -151,12 +152,10 @@ class Mystery(pygame.sprite.Sprite):
             elif random == 'bua_di_lui':
                 self.bua_di_lui(car)
             self.kill()
-    def move(self, speed):
-        self.rect.left -= speed
 
-    def update(self, car, screen_speed):
+
+    def update(self, car):
         self.collide(car)
-        self.move(screen_speed)
 
     
 class Leaderboard():
@@ -174,6 +173,10 @@ class Leaderboard():
     def update(self):
         self.sort()
         if self.ranking:
+            maps_x = 140
+
+            # for i in range(5):
+            #     pygame.draw.rect(screen, 'White', (0, 0, 60, 40))
             for i in range(5):
                 text_surf = font.render(f'{self.cars_name[self.ranking[i].order]}',False,'Red')
                 text_rect = text_surf.get_rect(topright = (1280,i*35))
@@ -190,33 +193,11 @@ class Background():
         self.racetrack_rect1 = self.racetrack_surf.get_rect(topleft = (0, 170))
         self.racetrack_rect2 = self.racetrack_surf.get_rect(topleft = (self.racetrack_surf.get_width(), 170))
     
-        self.screen_speed = 5
         self.max_pos = 0
         self.max_speed = 0
         self.count = 0
         self.amount = 0
-    def movement(self):
-        self.sky_rect1.left -= self.screen_speed
-        self.sky_rect2.left -= self.screen_speed
-        self.racetrack_rect1.left -= self.screen_speed
-        self.racetrack_rect2.left -= self.screen_speed
-        if self.sky_rect1.right <= 0:
-            self.sky_rect1 = self.sky_surf.get_rect(topleft = (0,0))
-            self.sky_rect2 = self.sky_surf.get_rect(topleft = (self.sky_surf.get_width(),0))
-        if self.racetrack_rect1.right <= 0:
-            self.count += 1
-            self.racetrack_rect1 = self.racetrack_surf.get_rect(topleft = (0, 170))
-            self.racetrack_rect2 = self.racetrack_surf.get_rect(topleft = (self.racetrack_surf.get_width(), 170))
-        if self.max_pos >= 700:
-            self.screen_speed = self.max_speed
-            self.amount = 2
-        elif self.max_pos <= 440:
-            if self.screen_speed > 0:
-                self.screen_speed -= self.amount
-                self.amount *= 2
-            else: self.screen_speed = 0
-        if self.count >= 3:
-            self.screen_speed = 0
+    
         
     
     def update(self):
@@ -224,7 +205,7 @@ class Background():
         screen.blit(self.sky_surf, self.sky_rect2)
         screen.blit(self.racetrack_surf, self.racetrack_rect1)
         screen.blit(self.racetrack_surf, self.racetrack_rect2)
-        self.movement()
+
 
 class Racing():
     def __init__(self, cars_name, map_number):
@@ -238,13 +219,12 @@ class Racing():
         self.leaderboard = Leaderboard(self.cars_name)
         
         self.bg = Background(map_number)
-        self.screen_speed = self.bg.screen_speed
 
-        self.car1 = Car(0,1, self.leaderboard, self.screen_speed,self.final_rank)
-        self.car2 = Car(1,1, self.leaderboard, self.screen_speed,self.final_rank)
-        self.car3 = Car(2,1, self.leaderboard, self.screen_speed,self.final_rank)
-        self.car4 = Car(3,1, self.leaderboard, self.screen_speed,self.final_rank)
-        self.car5 = Car(4,1, self.leaderboard, self.screen_speed,self.final_rank)
+        self.car1 = Car(0,1, self.leaderboard,self.final_rank)
+        self.car2 = Car(1,1, self.leaderboard,self.final_rank)
+        self.car3 = Car(2,1, self.leaderboard,self.final_rank)
+        self.car4 = Car(3,1, self.leaderboard,self.final_rank)
+        self.car5 = Car(4,1, self.leaderboard,self.final_rank)
         
         
 
@@ -256,7 +236,9 @@ class Racing():
 
         self.mystery_list = pygame.sprite.Group()
         for i in range(5):
-            self.mystery_list.add(Mystery(i * 100 + 245))
+            self.mystery_list.add(Mystery(randint(250, 350), i * 100 + 245))
+        for i in range(5):
+            self.mystery_list.add(Mystery(randint(700, 900), i * 100 + 245))
 
     def display_time(self):
         global current_time
@@ -289,19 +271,13 @@ class Racing():
         self.display_time()
         self.get_max()
 
-        #update screen_speed for each car
-        self.car1.screen_speed = self.bg.screen_speed
-        self.car2.screen_speed = self.bg.screen_speed
-        self.car3.screen_speed = self.bg.screen_speed
-        self.car4.screen_speed = self.bg.screen_speed
-        self.car5.screen_speed = self.bg.screen_speed
 
         self.mystery_list.draw(screen)
-        self.mystery_list.update(self.car1,self.screen_speed)
-        self.mystery_list.update(self.car2,self.screen_speed)
-        self.mystery_list.update(self.car3,self.screen_speed)
-        self.mystery_list.update(self.car4,self.screen_speed)
-        self.mystery_list.update(self.car5,self.screen_speed)
+        self.mystery_list.update(self.car1)
+        self.mystery_list.update(self.car2)
+        self.mystery_list.update(self.car3)
+        self.mystery_list.update(self.car4)
+        self.mystery_list.update(self.car5)
 
         self.leaderboard.update()
         self.car1.update()
