@@ -4,6 +4,7 @@ from operator import attrgetter
 
 pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
+pygame.display.set_caption('US88')
 font = pygame.font.SysFont('Consolas',30)
 
 normal1_1 = ['cars/AS87/AS87_1.png', 'cars/NA4/NA4_1.png', 'cars/NA5/NA5_1.png', 'cars/NA6/NA6_1.png', 'cars/NA2/NA2_1.png']
@@ -54,6 +55,16 @@ class Car():
             return self.mid_speed3
         else: return self.fin_speed
     
+    def return_speed(self):
+        if current_time <= self.start_time + self.duration:
+            if self.buff == 'bua_tang_toc':
+                return self.speed() + 5
+            if self.buff == 'bua_cham':
+                return self.speed() - 5
+            if self.buff == 'bua_di_lui':
+                return -5
+        return self.speed()
+
     def check_buff(self):
         if current_time <= self.start_time + self.duration:
             if self.buff == 'bua_tang_toc':
@@ -167,29 +178,76 @@ class Leaderboard():
                 text_surf = font.render(f'{self.cars_name[self.ranking[i].order]}',False,'Red')
                 text_rect = text_surf.get_rect(topright = (1280,i*35))
                 screen.blit(text_surf, text_rect)
-                
+
+class Background():
+    def __init__(self, map_number):
+
+        self.sky_surf = pygame.image.load(f'maps/sky{map_number}.png').convert()
+        self.sky_rect1 = self.sky_surf.get_rect(topleft = (0,0))
+        self.sky_rect2 = self.sky_surf.get_rect(topleft = (self.sky_surf.get_width(),0))
+
+        self.racetrack_surf = pygame.image.load(f'maps/racetrack{map_number}.jpg').convert()
+        self.racetrack_rect1 = self.racetrack_surf.get_rect(topleft = (0, 170))
+        self.racetrack_rect2 = self.racetrack_surf.get_rect(topleft = (self.racetrack_surf.get_width(), 170))
+    
+        self.screen_speed = 5
+        self.max_pos = 0
+        self.max_speed = 0
+        self.count = 0
+        self.amount = 0
+    def movement(self):
+        self.sky_rect1.left -= self.screen_speed
+        self.sky_rect2.left -= self.screen_speed
+        self.racetrack_rect1.left -= self.screen_speed
+        self.racetrack_rect2.left -= self.screen_speed
+        if self.sky_rect1.right <= 0:
+            self.sky_rect1 = self.sky_surf.get_rect(topleft = (0,0))
+            self.sky_rect2 = self.sky_surf.get_rect(topleft = (self.sky_surf.get_width(),0))
+        if self.racetrack_rect1.right <= 0:
+            self.count += 1
+            self.racetrack_rect1 = self.racetrack_surf.get_rect(topleft = (0, 170))
+            self.racetrack_rect2 = self.racetrack_surf.get_rect(topleft = (self.racetrack_surf.get_width(), 170))
+        if self.max_pos >= 700:
+            self.screen_speed = self.max_speed
+            self.amount = 2
+        elif self.max_pos <= 440:
+            if self.screen_speed > 0:
+                self.screen_speed -= self.amount
+                self.amount *= 2
+            else: self.screen_speed = 0
+        if self.count >= 3:
+            self.screen_speed = 0
+        
+    
+    def update(self):
+        screen.blit(self.sky_surf, self.sky_rect1)
+        screen.blit(self.sky_surf, self.sky_rect2)
+        screen.blit(self.racetrack_surf, self.racetrack_rect1)
+        screen.blit(self.racetrack_surf, self.racetrack_rect2)
+        self.movement()
 
 class Racing():
-    def __init__(self, cars_name):
+    def __init__(self, cars_name, map_number):
 
         self.final_rank = 5 
-        self.screen_speed = 5
         self.start_time = 0
         self.current_time = 0
 
         
         self.cars_name = cars_name
-        
-
         self.leaderboard = Leaderboard(self.cars_name)
         
+        self.bg = Background(map_number)
+        self.screen_speed = self.bg.screen_speed
 
-        self.car1 = Car(0,1, self.leaderboard, self.screen_speed, self.final_rank)
+        self.car1 = Car(0,1, self.leaderboard, self.screen_speed,self.final_rank)
         self.car2 = Car(1,1, self.leaderboard, self.screen_speed,self.final_rank)
         self.car3 = Car(2,1, self.leaderboard, self.screen_speed,self.final_rank)
         self.car4 = Car(3,1, self.leaderboard, self.screen_speed,self.final_rank)
         self.car5 = Car(4,1, self.leaderboard, self.screen_speed,self.final_rank)
         
+        
+
         self.leaderboard.append(self.car1)
         self.leaderboard.append(self.car2)
         self.leaderboard.append(self.car3)
@@ -207,14 +265,44 @@ class Racing():
         time_rect = time_surf.get_rect(topleft = (0,0))
         screen.blit(time_surf, time_rect)
 
+    def get_max(self):
+        self.bg.max_pos = 0
+        self.bg.max_pos = max(self.bg.max_pos, self.car1.rect.right)
+        self.bg.max_pos = max(self.bg.max_pos, self.car2.rect.right)
+        self.bg.max_pos = max(self.bg.max_pos, self.car3.rect.right)
+        self.bg.max_pos = max(self.bg.max_pos, self.car4.rect.right)
+        self.bg.max_pos = max(self.bg.max_pos, self.car5.rect.right)
+
+        self.bg.max_speed = 0
+        self.bg.max_speed = max(self.bg.max_speed, self.car1.return_speed())
+        self.bg.max_speed = max(self.bg.max_speed, self.car2.return_speed())
+        self.bg.max_speed = max(self.bg.max_speed, self.car3.return_speed())
+        self.bg.max_speed = max(self.bg.max_speed, self.car4.return_speed())
+        self.bg.max_speed = max(self.bg.max_speed, self.car5.return_speed())
+
+    def display_map(self):
+        self.bg.update()
+
     def run(self):           
+        self.display_map()
+
         self.display_time()
+        self.get_max()
+
+        #update screen_speed for each car
+        self.car1.screen_speed = self.bg.screen_speed
+        self.car2.screen_speed = self.bg.screen_speed
+        self.car3.screen_speed = self.bg.screen_speed
+        self.car4.screen_speed = self.bg.screen_speed
+        self.car5.screen_speed = self.bg.screen_speed
+
         self.mystery_list.draw(screen)
         self.mystery_list.update(self.car1,self.screen_speed)
         self.mystery_list.update(self.car2,self.screen_speed)
         self.mystery_list.update(self.car3,self.screen_speed)
         self.mystery_list.update(self.car4,self.screen_speed)
         self.mystery_list.update(self.car5,self.screen_speed)
+
         self.leaderboard.update()
         self.car1.update()
         self.car2.update()
@@ -223,4 +311,3 @@ class Racing():
         self.car5.update()
         
         
-

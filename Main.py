@@ -21,7 +21,7 @@ class Main():
             self.game.run()
         
         if self.game.state:
-            self.racing = runRacing(self.game.cars_name)
+            self.racing = runRacing(self.game.cars_name, self.game.map_number)
             self.racing.run()
         
         

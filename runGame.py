@@ -91,7 +91,7 @@ class runGame():
             else:
                 self.state = True
                 self.cars_name = self.game.cars_name_list
-                
+                self.map_number = self.game.map
                 break
 
             
