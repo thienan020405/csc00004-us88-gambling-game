@@ -28,7 +28,7 @@ COINS = 4
 
 # NAME
 NAMES = ['Hawkeye', 'Loki', 'Daredevil', 'Storm', 'Ultron', 'Groot', 'Magneto', 'Wanda', 'Wasp',
-         'Loki', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
+         'Shang-Chi', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
 
 TEST_NAMES = ['Hawkeye', 'Black Widow', 'Daredevil', 'Storm', 'Black Panther']
 

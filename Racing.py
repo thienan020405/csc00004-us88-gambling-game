@@ -56,6 +56,8 @@ class Car():
         else: return self.fin_speed
     
     def return_speed(self):
+        if (self.rect.right >= 1280):
+            return 0
         if current_time <= self.start_time + self.duration:
             if self.buff == 'bua_tang_toc':
                 return self.speed() + 5
@@ -105,6 +107,7 @@ class Car():
         else: screen.blit(self.image,self.rect)
         self.rect.right += (self.check_buff())
         if(self.rect.right >= 1280):
+            
             self.rect.right = 1280
             if self.final_rank1 == 0:
                 self.final_rank1 = self.final_rank2
@@ -174,13 +177,18 @@ class Leaderboard():
     def update(self):
         self.sort()
         if self.ranking:
+
             maps_x = 50
 
             for i in range(5):
-                text_surf = font.render(f'Lane {i + 1}: ',False,'Red')
+                
+                text_surf = font.render(f'Làn {i + 1}: ',False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, 25))
+                profile_surf = pygame.image.load('Profile Border.png').convert()
+                profile_surf = pygame.transform.scale(profile_surf, (230, 150))
+                screen.blit(profile_surf, (text_rect.x - 15 , text_rect.y - 15))
                 screen.blit(text_surf, text_rect)
-                text_surf = font.render(f'{self.cars_name[i]}',False,'Red')
+                text_surf = font.render(f'{self.cars_name[i]}',False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, 50))
                 screen.blit(text_surf, text_rect)
                 car_surf = pygame.image.load(f'{normal1_1[self.order[i]]}').convert_alpha()
@@ -193,7 +201,7 @@ class Leaderboard():
 
             for j in range(5):
                 maps_x = 50 + self.ranking[j].order * 250
-                s = f'Rank: {j + 1}'
+                s = f'Hạng: {j + 1}'
                 if j + 1 == 1:
                     s = s + 'st'
                 elif j + 1 == 2:
@@ -201,13 +209,23 @@ class Leaderboard():
                 elif j + 1 == 3:
                     s = s + 'rd'
                 else: s = s + 'th'
-                text_surf = font.render(s,False,'Red')
+                text_surf = font.render(s,False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, 75))
                 screen.blit(text_surf, text_rect)
-                text_surf = font.render(f'Effect: {self.ranking[j].buff}',False,'Red')
-                text_rect = text_surf.get_rect(midleft = (maps_x, 100))
+                if self.ranking[j].buff == None:
+                    text_surf = font.render(f'Hiệu ứng: không có',False,'White')
+                    text_rect = text_surf.get_rect(midleft = (maps_x, 100))
+                elif self.ranking[j].buff == 'bua_tang_toc':
+                    text_surf = font.render(f'Hiệu ứng: tăng tốc',False,'White')
+                    text_rect = text_surf.get_rect(midleft = (maps_x, 100))
+                elif self.ranking[j].buff == 'bua_cham':
+                    text_surf = font.render(f'Hiệu ứng: chậm',False,'White')
+                    text_rect = text_surf.get_rect(midleft = (maps_x, 100))
+                elif self.ranking[j].buff == 'bua_di_lui':
+                    text_surf = font.render(f'Hiệu ứng: đi lùi',False,'White')
+                    text_rect = text_surf.get_rect(midleft = (maps_x, 100))
                 screen.blit(text_surf, text_rect)
-                text_surf = font.render(f'Current speed: {self.ranking[j].return_speed()}',False,'Red')
+                text_surf = font.render(f'Tốc độ: {self.ranking[j].return_speed()}',False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, 125))
                 screen.blit(text_surf, text_rect)
 
@@ -277,24 +295,10 @@ class Racing():
     def display_time(self):
         global current_time
         current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
-        time_surf = font.render(f'Score: {current_time}',False,(64,64,64))
-        time_rect = time_surf.get_rect(topleft = (0,0))
-        screen.blit(time_surf, time_rect)
+        # time_surf = font.render(f'Score: {current_time}',False,(64,64,64))
+        # time_rect = time_surf.get_rect(topleft = (0,0))
+        # screen.blit(time_surf, time_rect)
 
-    def get_max(self):
-        self.bg.max_pos = 0
-        self.bg.max_pos = max(self.bg.max_pos, self.car1.rect.right)
-        self.bg.max_pos = max(self.bg.max_pos, self.car2.rect.right)
-        self.bg.max_pos = max(self.bg.max_pos, self.car3.rect.right)
-        self.bg.max_pos = max(self.bg.max_pos, self.car4.rect.right)
-        self.bg.max_pos = max(self.bg.max_pos, self.car5.rect.right)
-
-        self.bg.max_speed = 0
-        self.bg.max_speed = max(self.bg.max_speed, self.car1.return_speed())
-        self.bg.max_speed = max(self.bg.max_speed, self.car2.return_speed())
-        self.bg.max_speed = max(self.bg.max_speed, self.car3.return_speed())
-        self.bg.max_speed = max(self.bg.max_speed, self.car4.return_speed())
-        self.bg.max_speed = max(self.bg.max_speed, self.car5.return_speed())
 
     def display_map(self):
         self.bg.update()
@@ -303,7 +307,6 @@ class Racing():
         self.display_map()
 
         self.display_time()
-        self.get_max()
 
 
         self.mystery_list.draw(screen)

@@ -11,7 +11,7 @@ class Main():
         pygame.display.set_caption('US88')
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
-        # pygame.mouse.set_visible(False)
+        pygame.mouse.set_visible(False)
 
         self.game = runGame()
         
