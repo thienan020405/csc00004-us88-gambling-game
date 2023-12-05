@@ -333,9 +333,9 @@ class Racing():
     def display_map(self):
         self.bg.update()
 
-    def run(self):           
+    def run(self):        
+        # blit the background and timer   
         self.display_map()
-
         self.display_time()
 
         # draw mystery and update collision 
