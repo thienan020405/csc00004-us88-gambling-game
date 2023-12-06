@@ -34,6 +34,7 @@ class Car():
         
         # assign image to the car
         if map == 1:
+            
             surf1 = pygame.image.load(f'{normal1_1[i]}').convert_alpha()
             surf2 = pygame.image.load(f'{normal1_2[i]}').convert_alpha()
             self.surf = [surf1, surf2]
@@ -146,7 +147,8 @@ class Car():
 class Mystery(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         super().__init__()
-        self.image = pygame.image.load('mystery.png').convert_alpha()
+        mystery = [1, 2, 3]
+        self.image = pygame.image.load(f'mystery/mystery{choice(mystery)}.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (65, 65))
         self.rect = self.image.get_rect(midleft = (x_pos, y_pos))
 
