@@ -2,15 +2,17 @@
 import sys
 
 from pygame.constants import MOUSEMOTION
-
+import tetris_main
 class Menu:
     def __init__(self):
         pygame.init()
+        
         self.screen_width = 1280
         self.screen_height = 720
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption("Game Menu")
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont('Consolas',75)
         self.current_screen = 'menu'
         self.backgrounds = {
             'menu': pygame.image.load('Graphic/menuchinh.png').convert(),
@@ -25,6 +27,8 @@ class Menu:
             'shop_mo_eng': pygame.image.load('Graphic/shopmo_eng.png').convert()
         }
         self.buttons = []
+        self.money = 0
+        
         
     def add_button(self, action, x, y, width, height):
         button_rect = pygame.Rect(x, y, width, height)
@@ -115,6 +119,9 @@ class Menu:
                         elif clicked_button == 'minigame':
                             pygame.display.set_caption("Minigame")
                             print("Play minigame")
+                            self.minigame = tetris_main.Main()
+                            self.minigame.music.set_volume(0.05)
+                            self.minigame.run()
                             # gọi minigame nếu k đủ tiền
                         elif clicked_button == 'play':
                             pygame.display.set_caption("Choose map")
@@ -235,8 +242,16 @@ class Menu:
             if self.current_screen == 'shop_mo' or self.current_screen == 'shop_mo_eng' :
                 self.shop_screen()
             
+            
             # in ảnh ra màn hình    
             self.screen.blit(self.backgrounds[self.current_screen], (0, 0))
+            print(self.money)
+            # in money
+            money_surf = self.font.render(f'{self.money}', False, 'Red')
+            money_rect = money_surf.get_rect(topleft = (1000, 250))
+            self.screen.blit(money_surf, money_rect)
+
+            # update screen
             pygame.display.flip()
             self.clock.tick(60)
 
