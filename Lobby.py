@@ -246,6 +246,9 @@ class Menu:
                             pygame.display.set_caption("Game Menu")
                             self.current_screen = 'menu_eng'
             
+            # in ảnh ra màn hình    
+            self.screen.blit(self.backgrounds[self.current_screen], (0, 0))
+
             # điều kiện chuyển màn hình                
             if self.current_screen == 'menu' or self.current_screen == 'menu_eng':
                 self.menu_screen()
@@ -262,8 +265,7 @@ class Menu:
             if self.current_screen == 'shop_mo' or self.current_screen == 'shop_mo_eng' :
                 self.shop_screen()
             
-            # in ảnh ra màn hình    
-            self.screen.blit(self.backgrounds[self.current_screen], (0, 0))
+            
             
             
 
