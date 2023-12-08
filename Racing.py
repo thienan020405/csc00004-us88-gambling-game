@@ -7,7 +7,7 @@ pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
 pygame.display.set_caption('US88')
 font = pygame.font.SysFont('Consolas',20)
-
+clock = pygame.time.Clock()
 normal1_1 = ['cars/AS87/AS87_1.png', 'cars/NA4/NA4_1.png', 'cars/NA5/NA5_1.png', 'cars/NA6/NA6_1.png', 'cars/NA2/NA2_1.png']
 normal1_2 = ['cars/AS87/AS87_2.png', 'cars/NA4/NA4_2.png', 'cars/NA5/NA5_2.png', 'cars/NA6/NA6_2.png', 'cars/NA2/NA2_2.png']
 tangtoc1_1 = ['cars/AS87/AS87_tang_toc_1.png', 'cars/NA4/NA4_tang_toc_1.png', 'cars/NA5/NA5_tang_toc_1.png', 'cars/NA6/NA6_tang_toc_1.png', 'cars/NA2/NA2_tang_toc_1.png']
@@ -19,8 +19,10 @@ set2 = ['xe6.png', 'xe7.png', 'xe8.png', 'xe9.png', 'xe10.png']
 
 class Car():
     def __init__(self, i, map, leaderboard, final_rank):
+        # general init
         self.order = i
-        
+        self.finish = False
+
         # buff 
         self.duration = 0
         self.start_time = 0
@@ -123,6 +125,7 @@ class Car():
 
         # check if touching the screen border
         if(self.rect.right >= 1280):
+            self.finish = True
             self.rect.right = 1280
             # saving final_rank for sorting the leaderboard if multiple cars have self.rect.right = 1280
             if self.final_rank1 == 0:
@@ -326,6 +329,10 @@ class Racing():
         for i in range(5):
             self.mystery_list.add(Mystery(randint(700, 900), i * 100 + 245))
 
+        # notification
+        self.noti_surf = pygame.image.load('notification.png').convert_alpha()
+        self.noti_rect = self.noti_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+
     # timer
     def display_time(self):
         global current_time
@@ -336,26 +343,44 @@ class Racing():
         self.bg.update()
 
     def run(self):        
-        # blit the background and timer   
-        self.display_map()
-        self.display_time()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
 
-        # draw mystery and update collision 
-        self.mystery_list.draw(screen)
-        self.mystery_list.update(self.car1)
-        self.mystery_list.update(self.car2)
-        self.mystery_list.update(self.car3)
-        self.mystery_list.update(self.car4)
-        self.mystery_list.update(self.car5)
+            # blit the background and timer   
+            self.display_map()
+            self.display_time()
 
-        # update the leaderboard
-        self.leaderboard.update()
+            # draw mystery and update collision 
+            self.mystery_list.draw(screen)
+            self.mystery_list.update(self.car1)
+            self.mystery_list.update(self.car2)
+            self.mystery_list.update(self.car3)
+            self.mystery_list.update(self.car4)
+            self.mystery_list.update(self.car5)
 
-        # update car movement
-        self.car1.update()
-        self.car2.update()
-        self.car3.update()
-        self.car4.update()
-        self.car5.update()
+            # update the leaderboard
+            self.leaderboard.update()
+
+            # update car movement
+            self.car1.update()
+            self.car2.update()
+            self.car3.update()
+            self.car4.update()
+            self.car5.update()
+
+            # blit notification
+            if(self.car1.finish and self.car2.finish and self.car3.finish and self.car4.finish and self.car5.finish):
+                screen.blit(self.noti_surf, self.noti_rect)
+                text_surf = font.render('THÔNG BÁO', False, 'Red')
+                text_surf = pygame.transform.scale_by(text_surf, 2)
+                text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 120))
+                screen.blit(text_surf, text_rect)
+            
+            
+            pygame.display.update()
+            clock.tick(60)
         
         

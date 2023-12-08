@@ -3,6 +3,9 @@ import sys
 
 from pygame.constants import MOUSEMOTION
 import tetris_main
+from Game import Game
+
+from login2 import FaceRecognitionApp
 class Menu:
     def __init__(self):
         pygame.init()
@@ -41,6 +44,11 @@ class Menu:
         return None
 
     def menu_screen(self):
+        # in money
+        money_surf = self.font.render(f'{self.money}', False, 'Red')
+        money_rect = money_surf.get_rect(topleft = (1000, 250))
+        self.screen.blit(money_surf, money_rect)
+        
         self.buttons = []
         
         self.add_button('play', 873, 321, 272, 110)
@@ -85,6 +93,7 @@ class Menu:
         
         self.add_button('shop', 153, 185, 365, 240)
         pass
+
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -142,6 +151,9 @@ class Menu:
                         elif clicked_button == 'minigame':
                             pygame.display.set_caption("Minigame")
                             print("Play minigame")
+                            self.minigame = tetris_main.Main()
+                            self.minigame.music.set_volume(0.05)
+                            self.minigame.run()
                             # gọi minigame nếu k đủ tiền
                         elif clicked_button == 'play':
                             pygame.display.set_caption("Choose map")
@@ -158,15 +170,19 @@ class Menu:
                     elif self.current_screen == 'chonmap' :
                         if clicked_button == 'map1':
                             print("Map university")
+                            Game(1).run()
                             # dẫn gem zô
                         elif clicked_button == 'map2':
                             print("Map grass field")
+                            Game(2).run()
                             # dẫn gem zô
                         elif clicked_button == 'map3':
                             print("Map countryside")
+                            Game(3).run()
                             # dẫn gem zô
                         elif clicked_button == 'map4':
                             print("Map city")
+                            Game(4).run()
                             # dẫn gem zô
                         elif clicked_button == 'back':
                                 pygame.display.set_caption("Game Menu")
@@ -176,15 +192,19 @@ class Menu:
                     elif self.current_screen == 'chonmap_eng' :
                         if clicked_button == 'map1':
                             print("Map university")
+                            Game(1).run()
                             # dẫn gem zô
                         elif clicked_button == 'map2':
                             print("Map grass field")
+                            Game(2).run()
                             # dẫn gem zô
                         elif clicked_button == 'map3':
                             print("Map countryside")
+                            Game(3).run()
                             # dẫn gem zô
                         elif clicked_button == 'map4':
                             print("Map city")
+                            Game(4).run()
                             # dẫn gem zô
                         elif clicked_button == 'back':
                                 pygame.display.set_caption("Game Menu")
@@ -242,14 +262,10 @@ class Menu:
             if self.current_screen == 'shop_mo' or self.current_screen == 'shop_mo_eng' :
                 self.shop_screen()
             
-            
             # in ảnh ra màn hình    
             self.screen.blit(self.backgrounds[self.current_screen], (0, 0))
-            print(self.money)
-            # in money
-            money_surf = self.font.render(f'{self.money}', False, 'Red')
-            money_rect = money_surf.get_rect(topleft = (1000, 250))
-            self.screen.blit(money_surf, money_rect)
+            
+            
 
             # update screen
             pygame.display.flip()
@@ -257,6 +273,9 @@ class Menu:
 
 
 if __name__ == "__main__":
-    menu = Menu()
-    menu.run()
+    menu = FaceRecognitionApp()
+    menu.main_screen()
+    if menu.confirm:
+        Menu().run()
+    # Menu().run()
      

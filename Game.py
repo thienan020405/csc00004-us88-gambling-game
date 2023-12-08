@@ -1,10 +1,12 @@
 from Settings import *
-
+from Racing import Racing
 class Game:
-    def __init__(self):
-        self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.SysFont('Consolas', 30)
-
+    def __init__(self, map_number):
+        pygame.init()
+        pygame.display.set_caption('US88')
+        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", 50)
         # Name for random choices
         self.Name = NAMES
 
@@ -28,12 +30,11 @@ class Game:
         self.cursor_img_rect = self.cursor_img.get_rect()
 
         # the number of map, car and coin that user choose
-        self.map = 0
+        self.map = map_number
         self.car = 0
         self.coin = 0
 
         # the state of each def
-        self.chose_map = False
         self.chose_car = False
         self.changed_name = False
         self.changed_opponents = False
@@ -46,44 +47,19 @@ class Game:
  
         self.enter = False
 
-    def run(self):        
-            
-            self.list_maps()
-            self.list_cars()
-            self.change_name()
-            self.bet_money()
-        
+        # background
+        self.bg = pygame.image.load('ChoosingCarBackground.png').convert_alpha()
+        self.bg.set_alpha(120)
     def display_cursor(self):
         self.cursor_img_rect = pygame.mouse.get_pos()
         self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
 
 
-    def list_maps(self):       
-
-        if self.chose_map == False:          
-            self.display_surface.fill((94,129,162))
-            maps_x = 140
-
-            text = self.font.render('HÃY CHỌN CHIẾN TRƯỜNG CỦA BẠN', False, 'Red')
-            text_rect = text.get_rect(center = (640, 100))
-            self.display_surface.blit(text, text_rect)
-
-            for i in range(1, MAPS + 1):
-                maps_image = pygame.transform.scale(pygame.image.load(f'maps/map{i}.jpg'), (150, 150)).convert_alpha()
-                maps_rect = maps_image.get_rect(center = (maps_x, 360))
-                self.maps_rect_list.append(maps_rect)
-                self.display_surface.blit(maps_image, maps_rect)
-
-                maps_x += (GAME_WIDTH - 280) / (MAPS - 1)
-
-        if self.map > 0 and self.chose_map == False:
-            self.map_image = pygame.image.load(f'maps/map{self.map}.jpg')
-            self.chose_map = True
-
     def list_cars(self):
 
-        if self.chose_car == False and self.chose_map == True:
-            self.display_surface.fill((94,129,162))
+        if self.chose_car == False:
+            self.display_surface.fill((0, 0, 0))
+            self.display_surface.blit(self.bg, (0, 0))
             cars_x = 140
 
             text = self.font.render('HÃY CHỌN CHIẾN MÃ CỦA BẠN', False, 'Red')
@@ -107,10 +83,9 @@ class Game:
 
     def change_name(self):
 
-
         if self.chose_car and self.changed_name == False:
-
-            self.display_surface.fill((94,129,162))
+            self.display_surface.fill((0, 0, 0))
+            self.display_surface.blit(self.bg, (0, 0))
             cars_x = 140
 
             text = self.font.render('HÃY CHỌN BÍ DANH CHO BẢN THÂN VÀ CÁC ĐỐI THỦ', False, 'Red')
@@ -150,7 +125,8 @@ class Game:
         
         if self.changed_name and self.chose_coin == False:
 
-            self.display_surface.fill((94,129,162))
+            self.display_surface.fill((0, 0, 0))
+            self.display_surface.blit(self.bg, (0, 0))
             coins_x = 140
 
             text = self.font.render('HÃY CHỌN MỨC CƯỢC THÔI NÀO', False, 'Red')
@@ -175,4 +151,74 @@ class Game:
         if self.coin > 0 and self.chose_coin == False:
             self.chose_coin = True
             
-     
+
+    def run(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    
+                    self.mouse_sound.play()
+
+                    # Choose your car
+                    if self.chose_car == False:
+                        for j in range(len(self.cars_rect_list)):
+                            if self.cars_rect_list[j].collidepoint(event.pos):
+                                self.car = j + 1
+
+                    # Choose your bet money
+                    if self.chose_coin == False:
+                        for k in range(len(self.coins_rect_list)):
+                            if self.coins_rect_list[k].collidepoint(event.pos):
+                                self.coin = (k + 1) * 1000
+
+                if event.type == pygame.KEYDOWN:
+
+                    self.enter = True
+
+                    # Input name for each car
+                    if self.chose_car and self.changed_opponents == False:
+                        
+                        if event.key == pygame.K_BACKSPACE and len(self.cars_name_list[self.current_opponent]) >= 10:
+                            self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][:-1]
+
+                        elif event.key == pygame.K_RETURN and self.enter:
+                            self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][9:]
+                                                         
+                            if len(self.cars_name_list[self.current_opponent]) == 0:
+                                self.cars_name_list[self.current_opponent] = choice(self.Name)
+                                self.Name.remove(self.cars_name_list[self.current_opponent])
+
+                            self.name_x += (GAME_WIDTH - 280) / (CARS - 1)
+
+                            self.current_opponent += 1
+
+                            self.enter = False
+
+                            if self.current_opponent == CARS:
+                                self.changed_opponents = True
+
+                        elif len(self.cars_name_list[self.current_opponent]) < 22:
+                            self.cars_name_list[self.current_opponent] += event.unicode
+
+                    if self.changed_opponents and self.changed_name == False:
+                        if self.enter:
+                            self.changed_name = True
+
+            if self.chose_coin == False:
+                self.list_cars()
+                self.change_name()
+                self.bet_money()
+            else:
+                Racing(self.cars_name_list, self.map).run()
+                break
+                
+            # draw game cursor
+            self.cursor_img_rect = pygame.mouse.get_pos()
+            self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
+
+            pygame.display.update()
+            self.clock.tick(60) 

@@ -5,6 +5,8 @@ from os.path import join
 
 from tetris_timer import Timer
 from Lobby import Menu
+
+lobby = Menu()
 class Game:
 	def __init__(self, get_next_shape, update_score, music):
 
@@ -73,11 +75,13 @@ class Game:
 	def check_game_over(self):
 		for block in self.tetromino.blocks:
 			if block.pos.y < 0:
-				self.lobby = Menu()
+				
+
+				lobby.screen = pygame.display.set_mode((lobby.screen_width, lobby.screen_height))
 				self.music.stop()
-				self.lobby.money += self.current_score
-				self.lobby.current_screen = 'menu'
-				self.lobby.run()
+				lobby.money += self.current_score
+				lobby.current_screen = 'menu'
+				lobby.run()
 
 
 	def create_new_tetromino(self):
