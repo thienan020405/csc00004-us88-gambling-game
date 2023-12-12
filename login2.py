@@ -14,6 +14,7 @@ from pygame import *
 class FaceRecognitionApp:
     def __init__(self):
         self.confirm = False
+        self.name = "Admin"
         self.user_data_path = "data"
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
@@ -83,6 +84,7 @@ class FaceRecognitionApp:
 
         if results[0]:
             messagebox.showinfo("Đăng nhập", "Đăng nhập thành công.")
+            self.name = username
             self.confirm = True
             self.screen.destroy()
         else:
@@ -141,6 +143,7 @@ class FaceRecognitionApp:
             if password == stored_password:
                 messagebox.showinfo("Thông báo", "Đăng nhập thành công.")
                 self.confirm = True
+                self.name = username
                 self.screen.destroy()
             else:
                 messagebox.showerror("Lỗi", "Mật khẩu không đúng. Đăng nhập thất bại.")

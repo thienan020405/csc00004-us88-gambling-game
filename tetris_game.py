@@ -81,7 +81,7 @@ class Game:
 				self.music.stop()
 				lobby.money += self.current_score
 				lobby.current_screen = 'menu'
-				lobby.run()
+				lobby.run(lobby.username)
 
 
 	def create_new_tetromino(self):

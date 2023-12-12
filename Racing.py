@@ -1,4 +1,5 @@
 import pygame
+import sys
 from random import randint, choice
 from operator import attrgetter
 from Settings import *
@@ -17,8 +18,9 @@ cham1_2 = ['cars/AS87/AS87_cham_2.png', 'cars/NA4/NA4_cham_2.png', 'cars/NA5/NA5
 winner = ['cars/AS87/winner.png', 'cars/NA4/winner.png', 'cars/NA5/winner.png', 'cars/NA6/winner.png', 'cars/NA2/winner.png']
 set2 = ['xe6.png', 'xe7.png', 'xe8.png', 'xe9.png', 'xe10.png']
 
+final_rank2 = 5
 class Car():
-    def __init__(self, i, map, leaderboard, final_rank):
+    def __init__(self, i, map, leaderboard):
         # general init
         self.order = i
         self.finish = False
@@ -31,9 +33,9 @@ class Car():
         # leaderboard setting up
         self.leaderboard = leaderboard
         self.final_rank1 = 0
-        self.final_rank2 = final_rank
-        self.pos = 1
         
+        self.pos = 1
+        self.time = 0
         # assign image to the car
         if map == 1:
             
@@ -109,6 +111,7 @@ class Car():
     
     # car movement
     def movement(self):
+        global final_rank2
         # playing winning animation if final rank is 1st
         if self.order == self.leaderboard.ranking[0].order and self.rect.right >= 1280:
                 surf1 = pygame.image.load(f'{winner[self.order]}').convert_alpha()
@@ -128,9 +131,11 @@ class Car():
             self.finish = True
             self.rect.right = 1280
             # saving final_rank for sorting the leaderboard if multiple cars have self.rect.right = 1280
+            if self.time == 0:
+                self.time = real_time
             if self.final_rank1 == 0:
-                self.final_rank1 = self.final_rank2
-                self.final_rank2 -= 1
+                self.final_rank1 = final_rank2
+                final_rank2 -= 1
         
         # saving pos for sorting the leaderboard
         self.pos = self.rect.right
@@ -168,7 +173,7 @@ class Mystery(pygame.sprite.Sprite):
 
     def bua_di_lui(self, car):
         car.buff = 'bua_di_lui'
-        car.duration = 3
+        car.duration = 1
         car.start_time = current_time
     
     # check collistion between the car and mystery box
@@ -291,14 +296,229 @@ class Background():
 
         screen.blit(self.fin_surf, self.fin_rect)
 
+class AfterRace():
+    def __init__(self, car1, car2, car3, car4, car5, leaderboard, chosen_car, coin_betted, cars_name):
+        
+        self.stage_surf = pygame.image.load('stage.png').convert_alpha()
+        self.stage_surf = pygame.transform.scale_by(self.stage_surf, 1.5)
+        self.stage_rect = self.stage_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 + 50))
+
+        self.stage_bg_surf = pygame.image.load('ChoosingCarBackground.png').convert_alpha()
+        self.stage_bg_rect = self.stage_bg_surf.get_rect(topleft = (0,0))
+
+        # button to ldb screen
+        self.button1_surf = pygame.image.load('wodden_button.png').convert_alpha()
+        self.button1_rect = self.button1_surf.get_rect(bottomright = (1280,720))
+
+        # button to noti screen
+        self.button2_surf = pygame.image.load('wodden_button.png').convert_alpha()
+        self.button2_rect = self.button2_surf.get_rect(bottomright = (1280,720))
+        
+        self.ldb_surf = pygame.image.load('ldb.png').convert_alpha()
+        self.ldb_rect = self.ldb_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+
+        self.noti_surf = pygame.image.load('notification.png').convert_alpha()
+        self.noti_rect = self.noti_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+
+        self.cam_surf = pygame.image.load('cam_button.png').convert_alpha()
+        self.cam_rect = self.cam_surf.get_rect(topleft = (1188, 21))
+
+        self.ok_surf = pygame.image.load('wodden_button.png').convert_alpha()
+        self.ok_rect = self.ok_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 + 175))
+        self.stage = True
+        self.ldb = False
+        self.noti = False
+        self.car1 = car1
+        self.car2 = car2
+        self.car3 = car3
+        self.car4 = car4
+        self.car5 = car5
+
+        self.leaderboard = leaderboard
+        self.chosen_car = chosen_car
+        self.coin_betted = coin_betted
+        self.cars_name = cars_name
+    def run(self):
+        state = 'Win'
+        ldb_active = True
+        while ldb_active:
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        mouse_pos = pygame.mouse.get_pos()
+                        
+                        if self.button2_rect.collidepoint(mouse_pos) and self.stage == False and self.noti == False:
+                            self.stage = False
+                            self.ldb = False
+                            self.noti = True
+                        
+                        if self.button1_rect.collidepoint(mouse_pos) and self.ldb == False and self.noti == False:
+                            self.stage = False
+                            self.ldb = True
+                            self.noti = False
+                        
+                        if self.ok_rect.collidepoint(mouse_pos):
+                            if state == 'Win':
+                                return True
+                            else:
+                                return False
+                        
+                        
+                    
+            if self.stage:
+                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
+                screen.blit(self.stage_surf, self.stage_rect)
+                screen.blit(self.button1_surf, self.button1_rect)
+                screen.blit(self.cam_surf, self.cam_rect)
+                if self.car1.final_rank1 == 5:
+                    first_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    first_surf = pygame.transform.scale(first_surf, (65, 65))
+                    first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
+                elif self.car1.final_rank1 == 4:
+                    second_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    second_surf = pygame.transform.scale(second_surf, (65, 65))
+                    second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
+                elif self.car1.final_rank1 == 3:
+                    third_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    third_surf = pygame.transform.scale(third_surf, (65, 65))
+                    third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
+
+                if self.car2.final_rank1 == 5:
+                    first_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    first_surf = pygame.transform.scale(first_surf, (65, 65))
+                    first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
+                elif self.car2.final_rank1 == 4:
+                    second_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    second_surf = pygame.transform.scale(second_surf, (65, 65))
+                    second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
+                elif self.car2.final_rank1 == 3:
+                    third_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    third_surf = pygame.transform.scale(third_surf, (65, 65))
+                    third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
+                
+                if self.car3.final_rank1 == 5:
+                    first_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    first_surf = pygame.transform.scale(first_surf, (65, 65))
+                    first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
+                elif self.car3.final_rank1 == 4:
+                    second_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    second_surf = pygame.transform.scale(second_surf, (65, 65))
+                    second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
+                elif self.car3.final_rank1 == 3:
+                    third_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    third_surf = pygame.transform.scale(third_surf, (65, 65))
+                    third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
+
+                if self.car4.final_rank1 == 5:
+                    first_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    first_surf = pygame.transform.scale(first_surf, (65, 65))
+                    first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
+                elif self.car4.final_rank1 == 4:
+                    second_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    second_surf = pygame.transform.scale(second_surf, (65, 65))
+                    second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
+                elif self.car4.final_rank1 == 3:
+                    third_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    third_surf = pygame.transform.scale(third_surf, (65, 65))
+                    third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
+
+                if self.car5.final_rank1 == 5:
+                    first_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    first_surf = pygame.transform.scale(first_surf, (65, 65))
+                    first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
+                elif self.car5.final_rank1 == 4:
+                    second_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    second_surf = pygame.transform.scale(second_surf, (65, 65))
+                    second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
+                elif self.car5.final_rank1 == 3:
+                    third_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    third_surf = pygame.transform.scale(third_surf, (65, 65))
+                    third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
+
+                screen.blit(first_surf, first_rect)
+                screen.blit(second_surf, second_rect)
+                screen.blit(third_surf, third_rect)
+             
+            if self.ldb:
+                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
+                screen.blit(self.ldb_surf, self.ldb_rect)
+                screen.blit(self.button2_surf, self.button2_rect)
+                screen.blit(self.cam_surf, self.cam_rect)
+                for i in range(5):
+                    img_surf = pygame.image.load(f'{normal1_1[self.leaderboard.ranking[i].order]}').convert_alpha()
+                    img_surf = pygame.transform.scale(img_surf, (150, 50))
+                    img_rect = img_surf.get_rect(center = (550, 275 + i * 75))
+                    screen.blit(img_surf, img_rect)
+                    text_surf = font.render(f'{self.cars_name[self.leaderboard.ranking[i].order]}', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (700, 275 + i * 75))
+                    screen.blit(text_surf, text_rect)
+                    text_surf = font.render(f'{self.leaderboard.ranking[i].time}ms', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (850, 275 + i * 75))
+                    screen.blit(text_surf, text_rect)
+            
+            if self.noti:
+                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
+                screen.blit(self.noti_surf, self.noti_rect)
+                screen.blit(self.cam_surf, self.cam_rect)
+                screen.blit(self.ok_surf, self.ok_rect)
+                text_surf = font.render('THÔNG BÁO', False, 'Red')
+                text_surf = pygame.transform.scale_by(text_surf, 2)
+                text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 120))
+                screen.blit(text_surf, text_rect)
+                if self.car1.final_rank1 == 5 and self.chosen_car == 1:
+                    text_surf = font.render('BẠN ĐÃ CHIẾN THẮNG', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    screen.blit(text_surf, text_rect)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    
+                elif self.car2.final_rank1 == 5 and self.chosen_car == 2:
+                    text_surf = font.render('BẠN ĐÃ CHIẾN THẮNG', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    screen.blit(text_surf, text_rect)
+                    
+                elif self.car3.final_rank1 == 5 and self.chosen_car == 3:
+                    text_surf = font.render('BẠN ĐÃ CHIẾN THẮNG', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    screen.blit(text_surf, text_rect)
+
+                elif self.car4.final_rank1 == 5 and self.chosen_car == 4:
+                    text_surf = font.render('BẠN ĐÃ CHIẾN THẮNG', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    screen.blit(text_surf, text_rect)
+
+                elif self.car5.final_rank1 == 5 and self.chosen_car == 5:
+                    text_surf = font.render('BẠN ĐÃ CHIẾN THẮNG', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    screen.blit(text_surf, text_rect)
+
+                else:
+                    state = 'Lose'
+                    text_surf = font.render('BẠN ĐÃ THẤT BẠI', False, 'Red')
+                    text_surf = pygame.transform.scale_by(text_surf, 2)
+                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 50))
+                    screen.blit(text_surf, text_rect)
+                
+            pygame.display.update()
+            clock.tick(60)
+
+
 
 class Racing():
-    def __init__(self, cars_name, map_number):
+    def __init__(self, cars_name, map_number, chosen_car, coin_betted):
         # init the rank
         self.final_rank = 5 
 
+        self.chosen_car = chosen_car
+        self.coin_betted = coin_betted
+
         # init the timer for the buff
-        self.start_time = 0
+        self.start_time = pygame.time.get_ticks()
         self.current_time = 0
 
         # assign the names into the game
@@ -309,11 +529,11 @@ class Racing():
         self.bg = Background(map_number)
 
         # init cars
-        self.car1 = Car(0,1, self.leaderboard,self.final_rank)
-        self.car2 = Car(1,1, self.leaderboard,self.final_rank)
-        self.car3 = Car(2,1, self.leaderboard,self.final_rank)
-        self.car4 = Car(3,1, self.leaderboard,self.final_rank)
-        self.car5 = Car(4,1, self.leaderboard,self.final_rank)
+        self.car1 = Car(0,1, self.leaderboard)
+        self.car2 = Car(1,1, self.leaderboard)
+        self.car3 = Car(2,1, self.leaderboard)
+        self.car4 = Car(3,1, self.leaderboard)
+        self.car5 = Car(4,1, self.leaderboard)
         
         # push cars into leaderboard
         self.leaderboard.append(self.car1, 0)
@@ -333,16 +553,19 @@ class Racing():
         self.noti_surf = pygame.image.load('notification.png').convert_alpha()
         self.noti_rect = self.noti_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
+        
     # timer
     def display_time(self):
-        global current_time
-        current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
+        global current_time, real_time
+        real_time = pygame.time.get_ticks()  - self.start_time
+        current_time = int(pygame.time.get_ticks() / 1000)  - int(self.start_time/1000) 
+        print(real_time)
 
     # blit map
     def display_map(self):
         self.bg.update()
 
-    def run(self):        
+    def run(self):       
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -371,15 +594,17 @@ class Racing():
             self.car4.update()
             self.car5.update()
 
-            # blit notification
+            print(self.car1.finish, self.car2.finish, self.car3.finish, self.car4.finish, self.car5.finish)
+            # blit stage and leaderboard
             if(self.car1.finish and self.car2.finish and self.car3.finish and self.car4.finish and self.car5.finish):
-                screen.blit(self.noti_surf, self.noti_rect)
-                text_surf = font.render('THÔNG BÁO', False, 'Red')
-                text_surf = pygame.transform.scale_by(text_surf, 2)
-                text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - 120))
-                screen.blit(text_surf, text_rect)
-            
-            
+                self.after = AfterRace(self.car1, self.car2, self.car3, self.car4,self.car5, self.leaderboard, self.chosen_car, self.coin_betted, self.cars_name)
+                global final_rank2
+                final_rank2 = 5
+                if self.after.run():
+                    return self.coin_betted
+                else:
+                    return -self.coin_betted
+                
             pygame.display.update()
             clock.tick(60)
         

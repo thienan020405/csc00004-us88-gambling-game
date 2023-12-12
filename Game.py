@@ -1,14 +1,15 @@
 from Settings import *
 from Racing import Racing
 class Game:
-    def __init__(self, map_number):
+    def __init__(self, map_number, user_coin):
         pygame.init()
         pygame.display.set_caption('US88')
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", 50)
         # Name for random choices
-        self.Name = NAMES
+        self.Name = ['Hawkeye', 'Loki', 'Daredevil', 'Storm', 'Ultron', 'Groot', 'Magneto', 'Wanda', 'Wasp',
+         'Shang-Chi', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
 
         # List of maps' images, list of cars' images and cars' rect
         self.maps_rect_list = []
@@ -20,19 +21,21 @@ class Game:
         self.name_x = 140
 
         self.coins_rect_list = []
-        self.coins_list = ['1000$', '2000$', '3000$', '4000$']
+        self.coins_list = ['100$', '200$', '300$', '400$']
 
         # cursor attributes
         self.mouse_pos = (0, 0)
         self.mouse_sound = pygame.mixer.Sound('mouseclick1.mp3')
         # pygame.mouse.set_visible(False)
-        self.cursor_img = pygame.image.load('normal.png')
-        self.cursor_img_rect = self.cursor_img.get_rect()
+        # self.cursor_img = pygame.image.load('normal.png')
+        # self.cursor_img_rect = self.cursor_img.get_rect()
 
         # the number of map, car and coin that user choose
         self.map = map_number
         self.car = 0
-        self.coin = 0
+        self.coin_betted = 0
+        self.coin = user_coin
+
 
         # the state of each def
         self.chose_car = False
@@ -148,7 +151,7 @@ class Game:
 
                 coins_x += (GAME_WIDTH - 280) / (COINS - 1)
 
-        if self.coin > 0 and self.chose_coin == False:
+        if self.coin_betted >= 100 and self.coin_betted <= self.coin and self.chose_coin == False:
             self.chose_coin = True
             
 
@@ -161,7 +164,7 @@ class Game:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     
-                    self.mouse_sound.play()
+                    # self.mouse_sound.play()
 
                     # Choose your car
                     if self.chose_car == False:
@@ -173,7 +176,7 @@ class Game:
                     if self.chose_coin == False:
                         for k in range(len(self.coins_rect_list)):
                             if self.coins_rect_list[k].collidepoint(event.pos):
-                                self.coin = (k + 1) * 1000
+                                self.coin_betted = (k + 1) * 100
 
                 if event.type == pygame.KEYDOWN:
 
@@ -191,6 +194,8 @@ class Game:
                             if len(self.cars_name_list[self.current_opponent]) == 0:
                                 self.cars_name_list[self.current_opponent] = choice(self.Name)
                                 self.Name.remove(self.cars_name_list[self.current_opponent])
+                                print(self.Name)
+                                
 
                             self.name_x += (GAME_WIDTH - 280) / (CARS - 1)
 
@@ -213,12 +218,12 @@ class Game:
                 self.change_name()
                 self.bet_money()
             else:
-                Racing(self.cars_name_list, self.map).run()
-                break
+                return Racing(self.cars_name_list, self.map, self.car, self.coin_betted).run()
+                
                 
             # draw game cursor
-            self.cursor_img_rect = pygame.mouse.get_pos()
-            self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
+            # self.cursor_img_rect = pygame.mouse.get_pos()
+            # self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
 
             pygame.display.update()
             self.clock.tick(60) 
