@@ -1,4 +1,7 @@
-1. Update notification if the player win the bet
-1.5: Home function which return to the lobby
+1. History
 2. Add LeMinhHai part into the game
 3. Missing Shop function => impact the maingame
+4. Lụm username vào game (profile nhân vật)
+5. Khung (Bảo dz vcl)
+6. Đồng bộ code
+7. map !!!!!

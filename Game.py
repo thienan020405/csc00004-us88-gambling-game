@@ -70,7 +70,7 @@ class Game:
             self.display_surface.blit(text, text_rect)
            
             for i in range(1, CARS + 1):                
-                cars_image = pygame.transform.scale(pygame.image.load(f'xe{i}.png').convert_alpha(), (100, 65))
+                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (100, 65))
                 cars_rect = cars_image.get_rect(center = (cars_x, 360))
                 if len(self.cars_rect_list) != CARS:
                     self.cars_image_list.append(cars_image)
@@ -80,7 +80,7 @@ class Game:
                 cars_x += (GAME_WIDTH - 280) / (CARS - 1)
 
         if self.car > 0 and self.chose_car == False:
-            self.cars_image_list[self.car - 1] = pygame.transform.scale(pygame.image.load(f'xe{self.car}.png').convert_alpha(), (100, 65))
+            # self.cars_image_list[self.car - 1] = pygame.transform.scale(pygame.image.load(f'xe{self.car}.png').convert_alpha(), (100, 65))
             self.chose_car = True
 
 

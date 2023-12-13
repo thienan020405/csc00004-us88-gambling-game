@@ -1,12 +1,14 @@
 ﻿import pygame
 import sys
+import pickle
 
 from pygame.constants import MOUSEMOTION
 import tetris_main
 from Game import Game
-
+from tesseract import tesseract_OCR
 
 from login2 import FaceRecognitionApp
+
 class Menu:
     def __init__(self):
         pygame.init()
@@ -76,11 +78,11 @@ class Menu:
         self.buttons = []  # Xóa danh sách các button cũ
     
         # Thêm các button mới
-        self.add_button('map1', 63, 205,177,232 )
-        self.add_button('map2', 469, 205,177,232)
-        self.add_button('map3', 724, 205,177,232)
-        self.add_button('map4', 976, 205,177,232)
-        self.add_button('map5', 1240,205,177,232)
+        self.add_button('map1', 63,  205,177,232 )
+        self.add_button('map2', 292, 205,177,232)
+        self.add_button('map3', 546, 205,177,232)
+        self.add_button('map4', 798, 205,177,232)
+        self.add_button('map5', 1053,205,177,232)
         self.add_button('back', 24, 28, 85, 51)
         pass
 
@@ -196,8 +198,12 @@ class Menu:
                         elif clicked_button == 'settings':
                             pygame.display.set_caption("Settings")
                             self.current_screen = 'setting'
+                        elif clicked_button == 'button_O':
+                            tesseract_OCR()
+                            pass
                         elif clicked_button == 'back':
                             return
+
                         
                     # màn hình menu TA
                     elif self.current_screen == 'menu_eng' :
@@ -223,8 +229,12 @@ class Menu:
                         elif clicked_button == 'settings':
                             pygame.display.set_caption("Settings")
                             self.current_screen = 'setting_eng'
+                        elif clicked_button == 'button_O':
+                            tesseract_OCR()
+                            pass
                         elif clicked_button == 'back':
                             return    
+                        
                             
                             
                     #màn hình chọn map chơi TV

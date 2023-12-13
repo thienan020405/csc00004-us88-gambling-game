@@ -3,20 +3,15 @@ import sys
 from random import randint, choice
 from operator import attrgetter
 from Settings import *
+import os
 
 pygame.init()
 screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
 pygame.display.set_caption('US88')
 font = pygame.font.SysFont('Consolas',20)
 clock = pygame.time.Clock()
-normal1_1 = ['cars/AS87/AS87_1.png', 'cars/NA4/NA4_1.png', 'cars/NA5/NA5_1.png', 'cars/NA6/NA6_1.png', 'cars/NA2/NA2_1.png']
-normal1_2 = ['cars/AS87/AS87_2.png', 'cars/NA4/NA4_2.png', 'cars/NA5/NA5_2.png', 'cars/NA6/NA6_2.png', 'cars/NA2/NA2_2.png']
-tangtoc1_1 = ['cars/AS87/AS87_tang_toc_1.png', 'cars/NA4/NA4_tang_toc_1.png', 'cars/NA5/NA5_tang_toc_1.png', 'cars/NA6/NA6_tang_toc_1.png', 'cars/NA2/NA2_tang_toc_1.png']
-tangtoc1_2 = ['cars/AS87/AS87_tang_toc_2.png', 'cars/NA4/NA4_tang_toc_2.png', 'cars/NA5/NA5_tang_toc_2.png', 'cars/NA6/NA6_tang_toc_2.png', 'cars/NA2/NA2_tang_toc_2.png']
-cham1_1 = ['cars/AS87/AS87_cham_1.png', 'cars/NA4/NA4_cham_1.png', 'cars/NA5/NA5_cham_1.png', 'cars/NA6/NA6_cham_1.png', 'cars/NA2/NA2_cham_1.png']
-cham1_2 = ['cars/AS87/AS87_cham_2.png', 'cars/NA4/NA4_cham_2.png', 'cars/NA5/NA5_cham_2.png', 'cars/NA6/NA6_cham_2.png', 'cars/NA2/NA2_cham_2.png']
-winner = ['cars/AS87/winner.png', 'cars/NA4/winner.png', 'cars/NA5/winner.png', 'cars/NA6/winner.png', 'cars/NA2/winner.png']
-set2 = ['xe6.png', 'xe7.png', 'xe8.png', 'xe9.png', 'xe10.png']
+
+
 
 final_rank2 = 5
 class Car():
@@ -36,14 +31,53 @@ class Car():
         
         self.pos = 1
         self.time = 0
+
+        global normal_1, normal_2, tangtoc_1, tangtoc_2, cham_1, cham_2, winner
+
+        normal_1 = []
+        normal_2 = []
+        tangtoc_1 = []
+        tangtoc_2 = []
+        cham_1 = []
+        cham_2 = []
+        winner = []
+        
+        for j in range(5):
+            normal_1.append(f'sets/set{map}/cars/car{j+1}/normal1.png')
+        
+        
+        for j in range(5):
+            normal_2.append(f'sets/set{map}/cars/car{j+1}/normal2.png')
+
+        
+        for j in range(5):
+            tangtoc_1.append(f'sets/set{map}/cars/car{j+1}/boost1.png')
+
+        
+        for j in range(5):
+            tangtoc_2.append(f'sets/set{map}/cars/car{j+1}/boost2.png')
+
+        
+        for j in range(5):
+            cham_1.append(f'sets/set{map}/cars/car{j+1}/slow1.png')
+
+        
+        for j in range(5):
+            cham_2.append(f'sets/set{map}/cars/car{j+1}/slow2.png')
+
+        
+        for j in range(5):
+            winner.append(f'sets/set{map}/cars/car{j+1}/winner.png')
+
+
         # assign image to the car
-        if map == 1:
+        # if map == 1:
             
-            surf1 = pygame.image.load(f'{normal1_1[i]}').convert_alpha()
-            surf2 = pygame.image.load(f'{normal1_2[i]}').convert_alpha()
-            self.surf = [surf1, surf2]
-            self.index = 0
-            self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
+        surf1 = pygame.image.load(f'{normal_1[i]}').convert_alpha()
+        surf2 = pygame.image.load(f'{normal_2[i]}').convert_alpha()
+        self.surf = [surf1, surf2]
+        self.index = 0
+        self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
 
         self.rect = self.image.get_rect(midleft = (0, i * 100 + 245))
         
@@ -83,28 +117,28 @@ class Car():
     def check_buff(self):
         if current_time <= self.start_time + self.duration:
             if self.buff == 'bua_tang_toc':
-                surf1 = pygame.image.load(f'{tangtoc1_1[self.order]}').convert_alpha()
-                surf2 = pygame.image.load(f'{tangtoc1_2[self.order]}').convert_alpha()
+                surf1 = pygame.image.load(f'{tangtoc_1[self.order]}').convert_alpha()
+                surf2 = pygame.image.load(f'{tangtoc_2[self.order]}').convert_alpha()
                 self.surf = [surf1, surf2]
                 self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
                 if current_time == self.start_time + self.duration: self.buff = None
                 return self.speed() + 5
             if self.buff == 'bua_cham':
-                surf1 = pygame.image.load(f'{cham1_1[self.order]}').convert_alpha()
-                surf2 = pygame.image.load(f'{cham1_2[self.order]}').convert_alpha()
+                surf1 = pygame.image.load(f'{cham_1[self.order]}').convert_alpha()
+                surf2 = pygame.image.load(f'{cham_2[self.order]}').convert_alpha()
                 self.surf = [surf1, surf2]
                 self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
                 if current_time == self.start_time + self.duration: self.buff = None
                 return self.speed() - 5
             if self.buff == 'bua_di_lui':
-                surf1 = pygame.image.load(f'{normal1_1[self.order]}').convert_alpha()
-                surf2 = pygame.image.load(f'{normal1_2[self.order]}').convert_alpha()
+                surf1 = pygame.image.load(f'{normal_1[self.order]}').convert_alpha()
+                surf2 = pygame.image.load(f'{normal_2[self.order]}').convert_alpha()
                 self.surf = [surf1, surf2]
                 self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
                 if current_time == self.start_time + self.duration: self.buff = None
                 return -5
-        surf1 = pygame.image.load(f'{normal1_1[self.order]}').convert_alpha()
-        surf2 = pygame.image.load(f'{normal1_2[self.order]}').convert_alpha()
+        surf1 = pygame.image.load(f'{normal_1[self.order]}').convert_alpha()
+        surf2 = pygame.image.load(f'{normal_2[self.order]}').convert_alpha()
         self.surf = [surf1, surf2]
         self.image = pygame.transform.scale(self.surf[int(self.index)], (100, 65))
         return self.speed()
@@ -232,7 +266,7 @@ class Leaderboard():
                 text_rect = text_surf.get_rect(midleft = (maps_x, 50))
                 screen.blit(text_surf, text_rect)
 
-                car_surf = pygame.image.load(f'{normal1_1[self.order[i]]}').convert_alpha()
+                car_surf = pygame.image.load(f'{normal_1[self.order[i]]}').convert_alpha()
                 car_surf = pygame.transform.scale(car_surf, (75, 50))
                 car_rect = car_surf.get_rect(topright = (maps_x + 200, 25))
                 screen.blit(car_surf, car_rect)
@@ -274,10 +308,10 @@ class Leaderboard():
 class Background():
     def __init__(self, map_number):
 
-        self.sky_surf = pygame.image.load(f'maps/sky{map_number}.png').convert()
+        self.sky_surf = pygame.image.load(f'sets/set{map_number}/sky{map_number}.png').convert()
         self.sky_rect = self.sky_surf.get_rect(topleft = (0,0))
 
-        self.racetrack_surf = pygame.image.load(f'maps/racetrack{map_number}.jpg').convert()
+        self.racetrack_surf = pygame.transform.scale(pygame.image.load(f'sets/set{map_number}/racetrack{map_number}.jpg').convert(), (1280, 550))
         self.racetrack_rect = self.racetrack_surf.get_rect(topleft = (0, 170))
     
         self.fin_surf = pygame.image.load('finish_line.jpg').convert()
@@ -339,8 +373,22 @@ class AfterRace():
         self.coin_betted = coin_betted
         self.cars_name = cars_name
     def run(self):
+        # general init
         state = 'Win'
         ldb_active = True
+        # Thư mục để lưu ảnh
+        screenshot_folder = "screenshots"
+
+        # Đảm bảo thư mục tồn tại
+        if not os.path.exists(screenshot_folder):
+            os.makedirs(screenshot_folder)
+
+        # Đường dẫn và biến đếm để lưu ảnh
+        screenshot_base_name = "screenshot"
+        screenshot_extension = ".png"
+        screenshot_path = os.path.join(screenshot_folder, screenshot_base_name)
+        screenshot_count = 0
+        
         while ldb_active:
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -365,75 +413,83 @@ class AfterRace():
                             else:
                                 return False
                         
+                        if self.cam_rect.collidepoint(mouse_pos):
+                            while os.path.exists(f"{screenshot_path}_{screenshot_count}{screenshot_extension}"):
+                                screenshot_count += 1
+
+                            new_screenshot_path = f"{screenshot_path}_{screenshot_count}{screenshot_extension}"
+                            pygame.image.save(screen, new_screenshot_path)
+                            print("Chụp màn hình và lưu ảnh tại:", new_screenshot_path)
+                            pass
                         
-                    
+
             if self.stage:
                 screen.blit(self.stage_bg_surf, self.stage_bg_rect)
                 screen.blit(self.stage_surf, self.stage_rect)
                 screen.blit(self.button1_surf, self.button1_rect)
                 screen.blit(self.cam_surf, self.cam_rect)
                 if self.car1.final_rank1 == 5:
-                    first_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    first_surf = pygame.image.load(f'{normal_1[0]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (65, 65))
                     first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
                 elif self.car1.final_rank1 == 4:
-                    second_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    second_surf = pygame.image.load(f'{normal_1[0]}').convert_alpha()
                     second_surf = pygame.transform.scale(second_surf, (65, 65))
                     second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
                 elif self.car1.final_rank1 == 3:
-                    third_surf = pygame.image.load(f'{normal1_1[0]}').convert_alpha()
+                    third_surf = pygame.image.load(f'{normal_1[0]}').convert_alpha()
                     third_surf = pygame.transform.scale(third_surf, (65, 65))
                     third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
 
                 if self.car2.final_rank1 == 5:
-                    first_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    first_surf = pygame.image.load(f'{normal_1[1]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (65, 65))
                     first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
                 elif self.car2.final_rank1 == 4:
-                    second_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    second_surf = pygame.image.load(f'{normal_1[1]}').convert_alpha()
                     second_surf = pygame.transform.scale(second_surf, (65, 65))
                     second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
                 elif self.car2.final_rank1 == 3:
-                    third_surf = pygame.image.load(f'{normal1_1[1]}').convert_alpha()
+                    third_surf = pygame.image.load(f'{normal_1[1]}').convert_alpha()
                     third_surf = pygame.transform.scale(third_surf, (65, 65))
                     third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
                 
                 if self.car3.final_rank1 == 5:
-                    first_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    first_surf = pygame.image.load(f'{normal_1[2]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (65, 65))
                     first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
                 elif self.car3.final_rank1 == 4:
-                    second_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    second_surf = pygame.image.load(f'{normal_1[2]}').convert_alpha()
                     second_surf = pygame.transform.scale(second_surf, (65, 65))
                     second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
                 elif self.car3.final_rank1 == 3:
-                    third_surf = pygame.image.load(f'{normal1_1[2]}').convert_alpha()
+                    third_surf = pygame.image.load(f'{normal_1[2]}').convert_alpha()
                     third_surf = pygame.transform.scale(third_surf, (65, 65))
                     third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
 
                 if self.car4.final_rank1 == 5:
-                    first_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    first_surf = pygame.image.load(f'{normal_1[3]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (65, 65))
                     first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
                 elif self.car4.final_rank1 == 4:
-                    second_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    second_surf = pygame.image.load(f'{normal_1[3]}').convert_alpha()
                     second_surf = pygame.transform.scale(second_surf, (65, 65))
                     second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
                 elif self.car4.final_rank1 == 3:
-                    third_surf = pygame.image.load(f'{normal1_1[3]}').convert_alpha()
+                    third_surf = pygame.image.load(f'{normal_1[3]}').convert_alpha()
                     third_surf = pygame.transform.scale(third_surf, (65, 65))
                     third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
 
                 if self.car5.final_rank1 == 5:
-                    first_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    first_surf = pygame.image.load(f'{normal_1[4]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (65, 65))
                     first_rect = first_surf.get_rect(center = (WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 125))
                 elif self.car5.final_rank1 == 4:
-                    second_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    second_surf = pygame.image.load(f'{normal_1[4]}').convert_alpha()
                     second_surf = pygame.transform.scale(second_surf, (65, 65))
                     second_rect = second_surf.get_rect(center = (WINDOW_WIDTH/2 - 175, WINDOW_HEIGHT/2 - 35))
                 elif self.car5.final_rank1 == 3:
-                    third_surf = pygame.image.load(f'{normal1_1[4]}').convert_alpha()
+                    third_surf = pygame.image.load(f'{normal_1[4]}').convert_alpha()
                     third_surf = pygame.transform.scale(third_surf, (65, 65))
                     third_rect = third_surf.get_rect(center = (WINDOW_WIDTH/2 + 175, WINDOW_HEIGHT/2 - 35))
 
@@ -447,7 +503,7 @@ class AfterRace():
                 screen.blit(self.button2_surf, self.button2_rect)
                 screen.blit(self.cam_surf, self.cam_rect)
                 for i in range(5):
-                    img_surf = pygame.image.load(f'{normal1_1[self.leaderboard.ranking[i].order]}').convert_alpha()
+                    img_surf = pygame.image.load(f'{normal_1[self.leaderboard.ranking[i].order]}').convert_alpha()
                     img_surf = pygame.transform.scale(img_surf, (150, 50))
                     img_rect = img_surf.get_rect(center = (550, 275 + i * 75))
                     screen.blit(img_surf, img_rect)
@@ -529,11 +585,11 @@ class Racing():
         self.bg = Background(map_number)
 
         # init cars
-        self.car1 = Car(0,1, self.leaderboard)
-        self.car2 = Car(1,1, self.leaderboard)
-        self.car3 = Car(2,1, self.leaderboard)
-        self.car4 = Car(3,1, self.leaderboard)
-        self.car5 = Car(4,1, self.leaderboard)
+        self.car1 = Car(0,map_number, self.leaderboard)
+        self.car2 = Car(1,map_number, self.leaderboard)
+        self.car3 = Car(2,map_number, self.leaderboard)
+        self.car4 = Car(3,map_number, self.leaderboard)
+        self.car5 = Car(4,map_number, self.leaderboard)
         
         # push cars into leaderboard
         self.leaderboard.append(self.car1, 0)
