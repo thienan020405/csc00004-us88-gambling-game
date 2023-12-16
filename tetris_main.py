@@ -50,7 +50,7 @@ class Main:
 					exit() 
 			
 			# play music
-			self.music.play(-1)
+			# self.music.play(-1)
 			# self.music.set_volume(0.05)
 			# display 
 			self.display_surface.fill(GRAY)

@@ -1,0 +1,2 @@
+NAME = None
+MONEY = 0

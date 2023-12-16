@@ -1,7 +1,7 @@
-1. History
-2. Add LeMinhHai part into the game
-3. Missing Shop function => impact the maingame
-4. Lụm username vào game (profile nhân vật)
-5. Khung (Bảo dz vcl)
-6. Đồng bộ code
-7. map !!!!!
+1. Shop function !
+2. Resize (Bao) !
+3. History !
+4. Moving OCR to the leaderboard !
+5. Maingame language !
+5. Redesign database
+6. More friendly UI/UX

@@ -1,12 +1,13 @@
 from Settings import *
 from Racing import Racing
 class Game:
-    def __init__(self, map_number, user_coin):
+    def __init__(self, map_number, user_coin, item_speed, item_x2, item_sale):
         pygame.init()
         pygame.display.set_caption('US88')
-        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+        self.display_surface = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", 50)
+        self.width, self.height = self.display_surface.get_size()
+        self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", round(self.width * 5 / 128))
         # Name for random choices
         self.Name = ['Hawkeye', 'Loki', 'Daredevil', 'Storm', 'Ultron', 'Groot', 'Magneto', 'Wanda', 'Wasp',
          'Shang-Chi', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
@@ -18,7 +19,7 @@ class Game:
 
         self.cars_name_list = ['Bí danh: ', 'Bí danh: ', 'Bí danh: ', 'Bí danh: ', 'Bí danh: ']
         self.current_opponent = 0
-        self.name_x = 140
+        # self.name_x = self.width * 7 / 64
 
         self.coins_rect_list = []
         self.coins_list = ['100$', '200$', '300$', '400$']
@@ -51,8 +52,14 @@ class Game:
         self.enter = False
 
         # background
+        self.bg_temp = pygame.image.load('ChoosingCarBackground.png').convert_alpha()
         self.bg = pygame.image.load('ChoosingCarBackground.png').convert_alpha()
-        self.bg.set_alpha(120)
+        self.bg_temp.set_alpha(120)
+
+        self.item_speed = item_speed
+        self.item_x2 = item_x2
+        self.item_sale = item_sale
+
     def display_cursor(self):
         self.cursor_img_rect = pygame.mouse.get_pos()
         self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
@@ -63,21 +70,22 @@ class Game:
         if self.chose_car == False:
             self.display_surface.fill((0, 0, 0))
             self.display_surface.blit(self.bg, (0, 0))
-            cars_x = 140
+            cars_x = self.width * 7 / 64
 
             text = self.font.render('HÃY CHỌN CHIẾN MÃ CỦA BẠN', False, 'Red')
-            text_rect = text.get_rect(center = (640, 100))
+            text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
             self.display_surface.blit(text, text_rect)
            
+            self.cars_rect_list = []
             for i in range(1, CARS + 1):                
-                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (100, 65))
-                cars_rect = cars_image.get_rect(center = (cars_x, 360))
+                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
+                cars_rect = cars_image.get_rect(center = (cars_x, self.height / 2))
                 if len(self.cars_rect_list) != CARS:
                     self.cars_image_list.append(cars_image)
                     self.cars_rect_list.append(cars_rect)
                 self.display_surface.blit(cars_image, cars_rect)
 
-                cars_x += (GAME_WIDTH - 280) / (CARS - 1)
+                cars_x += (self.width - self.width * 7 / 32) / (CARS - 1)
 
         if self.car > 0 and self.chose_car == False:
             # self.cars_image_list[self.car - 1] = pygame.transform.scale(pygame.image.load(f'xe{self.car}.png').convert_alpha(), (100, 65))
@@ -85,14 +93,21 @@ class Game:
 
 
     def change_name(self):
-
+        
         if self.chose_car and self.changed_name == False:
+            self.cars_image_list = []
+
+            for i in range(1, CARS + 1):                
+                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
+                self.cars_image_list.append(cars_image)
+
             self.display_surface.fill((0, 0, 0))
             self.display_surface.blit(self.bg, (0, 0))
-            cars_x = 140
+            cars_x = self.width * 7 / 64
+            name_x = self.width * 7 / 64
 
             text = self.font.render('HÃY CHỌN BÍ DANH CHO BẢN THÂN VÀ CÁC ĐỐI THỦ', False, 'Red')
-            text_rect = text.get_rect(center = (640, 100))
+            text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
             self.display_surface.blit(text, text_rect)
              
             for i in range(CARS):
@@ -100,16 +115,16 @@ class Game:
                 cars_image = self.cars_image_list[i]
                 name_surface = self.font.render(self.cars_name_list[i], True, (255, 255, 255))
 
-                cars_rect = cars_image.get_rect(center = (cars_x, 360))
-                name_rect = name_surface.get_rect(center = (cars_x, 500))
+                cars_rect = cars_image.get_rect(center = (cars_x, self.height / 2))
+                name_rect = name_surface.get_rect(center = (cars_x, self.height * 25 / 36))
                                 
                 self.display_surface.blit(cars_image, cars_rect)
                 self.display_surface.blit(name_surface, name_rect)
 
                 if i == self.car - 1:
-                    pygame.draw.rect(self.display_surface, COLOR, cars_rect, 2)
+                    pygame.draw.rect(self.display_surface, COLOR, cars_rect, 1)
                 
-                cars_x += (GAME_WIDTH - 280) / (CARS - 1)
+                cars_x += (self.width - self.width * 7 / 32) / (CARS - 1)
 
             for i in range(CARS):
 
@@ -117,7 +132,7 @@ class Game:
 
                     name_surface = self.font.render(self.cars_name_list[self.current_opponent], True, (255, 255, 255))
 
-                    name_rect = name_surface.get_rect(center = (self.name_x, 500))
+                    name_rect = name_surface.get_rect(center = (name_x + (self.width - self.width * 7 / 32) / (CARS - 1) * i, self.height * 25 / 36))
 
                     pygame.draw.rect(self.display_surface, COLOR, name_rect, 2)
                                 
@@ -128,28 +143,29 @@ class Game:
         
         if self.changed_name and self.chose_coin == False:
 
+            self.coins_rect_list = []
             self.display_surface.fill((0, 0, 0))
             self.display_surface.blit(self.bg, (0, 0))
-            coins_x = 140
+            coins_x = self.width * 7 / 64
 
             text = self.font.render('HÃY CHỌN MỨC CƯỢC THÔI NÀO', False, 'Red')
-            text_rect = text.get_rect(center = (640, 100))
+            text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
             self.display_surface.blit(text, text_rect)
            
             for i in range(1, COINS + 1):                
-                coins_image = pygame.transform.scale(pygame.image.load(f'coins/coin{i}.png').convert_alpha(), (100, 80))
-                coins_rect = coins_image.get_rect(center = (coins_x, 360))
+                coins_image = pygame.transform.scale(pygame.image.load(f'coins/coin{i}.png').convert_alpha(), (self.width * 5 / 64, self.height / 9))
+                coins_rect = coins_image.get_rect(center = (coins_x, self.height / 2))
 
                 price_surface = self.font.render(self.coins_list[i - 1], True, (255, 255, 255))
-                price_rect = price_surface.get_rect(center = (coins_x, 500))
+                price_rect = price_surface.get_rect(center = (coins_x, self.height * 25 / 36))
 
-                if len(self.coins_rect_list) != COINS:
-                    self.coins_rect_list.append(coins_rect)
+                
+                self.coins_rect_list.append(coins_rect)
 
                 self.display_surface.blit(coins_image, coins_rect)
                 self.display_surface.blit(price_surface, price_rect)
 
-                coins_x += (GAME_WIDTH - 280) / (COINS - 1)
+                coins_x += (self.width - self.width * 7 / 32) / (COINS - 1)
 
         if self.coin_betted >= 100 and self.coin_betted <= self.coin and self.chose_coin == False:
             self.chose_coin = True
@@ -184,7 +200,7 @@ class Game:
 
                     # Input name for each car
                     if self.chose_car and self.changed_opponents == False:
-                        
+
                         if event.key == pygame.K_BACKSPACE and len(self.cars_name_list[self.current_opponent]) >= 10:
                             self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][:-1]
 
@@ -194,10 +210,9 @@ class Game:
                             if len(self.cars_name_list[self.current_opponent]) == 0:
                                 self.cars_name_list[self.current_opponent] = choice(self.Name)
                                 self.Name.remove(self.cars_name_list[self.current_opponent])
-                                print(self.Name)
                                 
 
-                            self.name_x += (GAME_WIDTH - 280) / (CARS - 1)
+                            # self.name_x += (self.width - self.width * 7 / 32) / (CARS - 1)
 
                             self.current_opponent += 1
 
@@ -213,17 +228,20 @@ class Game:
                         if self.enter:
                             self.changed_name = True
 
+
+            self.width, self.height = self.display_surface.get_size()
+            self.bg = pygame.transform.scale(self.bg_temp, (self.width, self.height))
+            self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", round(self.width * 5 / 128))
+
             if self.chose_coin == False:
                 self.list_cars()
                 self.change_name()
                 self.bet_money()
             else:
-                return Racing(self.cars_name_list, self.map, self.car, self.coin_betted).run()
+                return Racing(self.cars_name_list, self.map, self.car, self.coin_betted, self.item_speed, self.item_x2, self.item_sale).run()
                 
                 
-            # draw game cursor
-            # self.cursor_img_rect = pygame.mouse.get_pos()
-            # self.display_surface.blit(self.cursor_img, self.cursor_img_rect)
 
             pygame.display.update()
             self.clock.tick(60) 
+

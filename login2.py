@@ -8,12 +8,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pygame import *
-# import pickle
+import pickle
 
-class Player:
-    def __init__(self, name, money):
-        self.name = name
-        self.money = money
 
 class FaceRecognitionApp:
     def __init__(self):
@@ -48,10 +44,13 @@ class FaceRecognitionApp:
 
         cv2.imwrite(f"data/{username}.jpg", frame)
         messagebox.showinfo("Đăng ký", "Đăng ký thành công.")
-        # # add player information into pickle (database)
-        # player: Player = Player(username, 100)
-        # with open('data.pickle', 'wb') as file:
-        #     pickle.dump(player, file)
+        # open data file
+        with open('data.pickle', 'rb') as file:
+            data = pickle.load(file)
+        # add player information into pickle (database)
+        data.append({f'{username}': 400})
+        with open('data.pickle', 'wb') as file:
+            pickle.dump(data, file)
         self.screen4.destroy()
 
     def login_verify1(self):
@@ -177,10 +176,13 @@ class FaceRecognitionApp:
 
             self.send_registration_email(username, email)
             messagebox.showinfo("Thông báo", "Đăng ký thành công")
-            # # add player information into pickle (database)
-            # player: Player = Player(username, 100)
-            # with open('data.pickle', 'wb') as file:
-            #     pickle.dump(player, file)
+            # open data file
+            with open('data.pickle', 'rb') as file:
+                data = pickle.load(file)
+            # add player information into pickle (database)
+            data.append({f'{username}': 400})
+            with open('data.pickle', 'wb') as file:
+                pickle.dump(data, file)
             self.screen1.destroy()
 
     def window_register(self):
