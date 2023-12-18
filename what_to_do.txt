@@ -3,5 +3,7 @@
 3. History !
 4. Moving OCR to the leaderboard !
 5. Maingame language !
-5. Redesign database
-6. More friendly UI/UX
+6. Redesign database
+7. More user friendly UI/UX 
+
+

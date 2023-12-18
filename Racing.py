@@ -7,9 +7,10 @@ import os
 from tesseract import tesseract_OCR
 
 pygame.init()
-screen  = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
+screen  = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption('US88')
 font = pygame.font.SysFont('Consolas',20)
+noti_font = pygame.font.SysFont('Consolas',40)
 clock = pygame.time.Clock()
 width = 1280
 height = 720
@@ -23,6 +24,7 @@ class Car():
         # shop item init
         self.item_speed = item_speed
         self.chosen_car = chosen_car
+        
         
         # general init
         self.order = i
@@ -257,9 +259,10 @@ class Mystery(pygame.sprite.Sprite):
 
     
 class Leaderboard():
-    def __init__(self, cars_name, chosen_car, item_speed):
+    def __init__(self, cars_name, chosen_car, item_speed, language):
         global width, height
         width, height = screen.get_size()
+        self.language = language
         self.chosen_car = chosen_car
         self.item_speed = item_speed
         self.ranking = []
@@ -286,7 +289,10 @@ class Leaderboard():
             # blit unchanged stats
             maps_x = width * 5 / 128
             for i in range(5):
-                text_surf = font.render(f'Làn {i + 1}: ',False,'White')
+                if self.language == 'VN':
+                    text_surf = font.render(f'Làn {i + 1}: ',False,'White')
+                else:
+                    text_surf = font.render(f'Lane {i + 1}: ',False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 / 144))
                 profile_border = pygame.image.load('Profile Border.png').convert_alpha()
                 profile_border = pygame.transform.scale(profile_border, (width * 23 / 128, height * 5 / 24))
@@ -310,31 +316,58 @@ class Leaderboard():
             # blit changed stats
             for j in range(5):
                 maps_x = width * 5 / 128 + self.ranking[j].order * width * 25 / 128
-                s = f'Hạng: {j + 1}'
-                if j + 1 == 1:
-                    s = s + 'st'
-                elif j + 1 == 2:
-                    s = s + 'nd'
-                elif j + 1 == 3:
-                    s = s + 'rd'
-                else: s = s + 'th'
+                if self.language == 'VN':
+                    if j + 1 == 1:
+                        s = 'Hạng: nhất'
+                    elif j + 1 == 2:
+                        s = 'Hạng: nhì'
+                    elif j + 1 == 3:
+                        s = 'Hạng: ba'
+                    elif j + 1 == 4:
+                        s = 'Hạng: tư'
+                    elif j + 1 == 5:
+                        s = 'Hạng: năm'
+                else: 
+                    s = f'Rank: {j + 1}'
+                    if j + 1 == 1:
+                        s = s + 'st'
+                    elif j + 1 == 2:
+                        s = s + 'nd'
+                    elif j + 1 == 3:
+                        s = s + 'rd'
+                    else: s = s + 'th'
                 text_surf = font.render(s,False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 /48))
                 screen.blit(text_surf, text_rect)
                 if self.ranking[j].buff == None:
-                    text_surf = font.render(f'Hiệu ứng: không có',False,'White')
+                    if self.language == 'VN':
+                        text_surf = font.render(f'Hiệu ứng: không có',False,'White')
+                    else:
+                        text_surf = font.render(f'Effect: None',False,'White')
                     text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 / 36))
                 elif self.ranking[j].buff == 'bua_tang_toc':
-                    text_surf = font.render(f'Hiệu ứng: tăng tốc',False,'White')
+                    if self.language == 'VN':
+                        text_surf = font.render(f'Hiệu ứng: tăng tốc',False,'White')
+                    else:
+                        text_surf = font.render(f'Effect: acceleration',False,'White')
                     text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 / 36))
                 elif self.ranking[j].buff == 'bua_cham':
-                    text_surf = font.render(f'Hiệu ứng: chậm',False,'White')
+                    if self.language == 'VN':
+                        text_surf = font.render(f'Hiệu ứng: chậm',False,'White')
+                    else:
+                        text_surf = font.render(f'Effect: deceleration',False,'White')
                     text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 / 36))
                 elif self.ranking[j].buff == 'bua_di_lui':
-                    text_surf = font.render(f'Hiệu ứng: đi lùi',False,'White')
+                    if self.language == 'VN':
+                        text_surf = font.render(f'Hiệu ứng: đi lùi',False,'White')
+                    else:
+                        text_surf = font.render(f'Effect: backwards',False,'White')
                     text_rect = text_surf.get_rect(midleft = (maps_x, height * 5 / 36))
                 screen.blit(text_surf, text_rect)
-                text_surf = font.render(f'Tốc độ: {self.ranking[j].return_speed()}',False,'White')
+                if self.language == 'VN':
+                    text_surf = font.render(f'Tốc độ: {self.ranking[j].return_speed()}',False,'White')
+                else:
+                    text_surf = font.render(f'Speed: {self.ranking[j].return_speed()}',False,'White')
                 text_rect = text_surf.get_rect(midleft = (maps_x, height * 25 / 144))
                 screen.blit(text_surf, text_rect)
 
@@ -374,39 +407,56 @@ class Background():
         screen.blit(fin_surf, fin_rect)
 
 class AfterRace():
-    def __init__(self, car1, car2, car3, car4, car5, leaderboard, chosen_car, coin_betted, cars_name, item_speed, item_x2, item_sale):
+    def __init__(self, car1, car2, car3, car4, car5, leaderboard, chosen_car, coin_betted, cars_name, item_speed, item_x2, item_sale, history_index, history_profit, language):
         global width, height
         width, height = screen.get_size()
+        self.language = language
 
-        self.stage_surf = pygame.image.load('stage.png').convert_alpha()
+        self.history_profit = history_profit
+        self.history_index = history_index
+
+        self.stage_surf = pygame.image.load('stage.png').convert_alpha() # 612 408
         self.stage_surf = pygame.transform.scale_by(self.stage_surf, 1.5)
-        self.stage_rect = self.stage_surf.get_rect(center = (width/2, height/2 + height*5/72))
 
-        self.stage_bg_surf = pygame.image.load('ChoosingCarBackground.png').convert_alpha()
-        self.stage_bg_rect = self.stage_bg_surf.get_rect(topleft = (0,0))
+        # self.stage_rect = self.stage_surf.get_rect(center = (width/2, height/2 + height*5/72))
+
+        self.stage_bg_surf = pygame.image.load('ChoosingCarBackground.png').convert_alpha() #1280,721
+        # self.stage_bg_rect = self.stage_bg_surf.get_rect(topleft = (0,0))
 
         # button to ldb screen
-        self.button1_surf = pygame.image.load('wodden_button.png').convert_alpha()
-        self.button1_rect = self.button1_surf.get_rect(bottomright = (width,height))
+        if self.language == 'VN':
+            self.button1_surf = pygame.image.load('tieptuc.png').convert_alpha() #274,111
+        else:
+            self.button1_surf = pygame.image.load('tieptuc_eng.png').convert_alpha() #273,111
+
+        # self.button1_rect = self.button1_surf.get_rect(bottomright = (width,height))
 
         # button to noti screen
-        self.button2_surf = pygame.image.load('wodden_button.png').convert_alpha()
-        self.button2_rect = self.button2_surf.get_rect(bottomright = (width, height))
+        if self.language == 'VN':
+            self.button2_surf = pygame.image.load('tieptuc.png').convert_alpha()
+        else:
+            self.button2_surf = pygame.image.load('tieptuc_eng.png').convert_alpha()
+
+        # self.button2_rect = self.button2_surf.get_rect(bottomright = (width, height))
         
-        self.ldb_surf = pygame.image.load('ldb.png').convert_alpha()
-        self.ldb_rect = self.ldb_surf.get_rect(center = (width/2, height/2))
+        self.ldb_surf = pygame.image.load('ldb.png').convert_alpha() #701,601
+        # self.ldb_rect = self.ldb_surf.get_rect(center = (width/2, height/2))
 
-        self.noti_surf = pygame.image.load('notification.png').convert_alpha()
-        self.noti_rect = self.noti_surf.get_rect(center = (width/2, height/2))
+        self.noti_surf = pygame.image.load('notification.png').convert_alpha() #501,301
+        # self.noti_rect = self.noti_surf.get_rect(center = (width/2, height/2))
 
-        self.cam_surf = pygame.image.load('cam_button.png').convert_alpha()
-        self.cam_rect = self.cam_surf.get_rect(topleft = (width * 297 / 320, height * 7 / 240))
+        self.cam_surf = pygame.image.load('cam_button.png').convert_alpha() #69,69
+        # self.cam_rect = self.cam_surf.get_rect(topleft = (width * 297 / 320, height * 7 / 240))
 
-        self.ocr_surf = pygame.image.load('button_O.png').convert_alpha()
-        self.ocr_rect = self.ocr_surf.get_rect(topleft = (1188, 208))
+        self.ocr_surf = pygame.image.load('button_O.png').convert_alpha() #69,69
+        # self.ocr_rect = self.ocr_surf.get_rect(topleft = (1189, 114))
 
-        self.ok_surf = pygame.image.load('wodden_button.png').convert_alpha()
-        self.ok_rect = self.ok_surf.get_rect(center = (width/2, height/2 + height * 35 / 144))
+        if self.language == 'VN':
+            self.ok_surf = pygame.image.load('button_lobby.png').convert_alpha() #357,109
+        else:
+            self.ok_surf = pygame.image.load('button_lobby_eng.png').convert_alpha() #356,109
+        # self.ok_rect = self.ok_surf.get_rect(center = (width/2, height/2 + height * 35 / 144))
+            
         self.stage = True
         self.ldb = False
         self.noti = False
@@ -430,6 +480,7 @@ class AfterRace():
         # general init
         state = 'Win'
         ldb_active = True
+
         # Thư mục để lưu ảnh
         screenshot_folder = "screenshots"
 
@@ -442,6 +493,19 @@ class AfterRace():
         screenshot_extension = ".png"
         screenshot_path = os.path.join(screenshot_folder, screenshot_base_name)
         screenshot_count = 0
+
+        # Thư mục để lưu ảnh
+        history_folder = "history"
+
+        # Đảm bảo thư mục tồn tại
+        if not os.path.exists(history_folder):
+            os.makedirs(history_folder)
+
+        # Đường dẫn và biến đếm để lưu ảnh
+        history_base_name = "history"
+        history_extension = ".png"
+        history_path = os.path.join(history_folder, history_base_name)
+        history_count = 0
         
         while ldb_active:
             for event in pygame.event.get():
@@ -451,23 +515,38 @@ class AfterRace():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         mouse_pos = pygame.mouse.get_pos()
                         
-                        if self.button2_rect.collidepoint(mouse_pos) and self.stage == False and self.noti == False:
+                        if button2_rect.collidepoint(mouse_pos) and self.stage == False and self.noti == False:
+                            # save history
+                            while os.path.exists(f"{history_path}_{history_count}{history_extension}"):
+                                history_count += 1
+
+                            new_history_path = f"{history_path}_{history_count}{history_extension}"
+                            pygame.image.save(screen, new_history_path)
+                            print("Lưu history: ", new_history_path)
+                            
+                            if len(self.history_index) < 3:
+                                self.history_index.append(history_count)
+                            else:
+                                self.history_index[0] = self.history_index[1]
+                                self.history_index[1] = self.history_index[2]
+                                self.history_index[2] = history_count
+                            
                             self.stage = False
                             self.ldb = False
                             self.noti = True
                         
-                        if self.button1_rect.collidepoint(mouse_pos) and self.ldb == False and self.noti == False:
+                        if button1_rect.collidepoint(mouse_pos) and self.ldb == False and self.noti == False:
                             self.stage = False
                             self.ldb = True
                             self.noti = False
                         
-                        if self.ok_rect.collidepoint(mouse_pos):
+                        if ok_rect.collidepoint(mouse_pos):
                             if state == 'Win':
                                 return True
                             else:
                                 return False
                         
-                        if self.cam_rect.collidepoint(mouse_pos):
+                        if cam_rect.collidepoint(mouse_pos):
                             while os.path.exists(f"{screenshot_path}_{screenshot_count}{screenshot_extension}"):
                                 screenshot_count += 1
 
@@ -476,17 +555,44 @@ class AfterRace():
                             print("Chụp màn hình và lưu ảnh tại:", new_screenshot_path)
                             pass
 
-                        if self.ocr_rect.collidepoint(mouse_pos):
+                        if ocr_rect.collidepoint(mouse_pos):
                             tesseract_OCR()
                         
             global width, height
             width, height = screen.get_size()
 
+            stage_surf = pygame.transform.scale(self.stage_surf, (width * 918 / 1280, height * 612 / 720))
+            stage_rect = stage_surf.get_rect(center = (width/2, height/2 + height*5/72))
+
+            stage_bg_surf = pygame.transform.scale(self.stage_bg_surf, (width, height))
+            stage_bg_rect = stage_bg_surf.get_rect(topleft = (0,0))
+
+            button1_surf = pygame.transform.scale(self.button1_surf, (width * 274 / 1280, height * 111 / 720))
+            button1_rect = button1_surf.get_rect(bottomright = (width,height))
+
+            button2_surf = pygame.transform.scale(self.button2_surf, (width * 274 / 1280, height * 111 / 720))
+            button2_rect = button2_surf.get_rect(bottomright = (width,height))
+
+            ldb_surf = pygame.transform.scale(self.ldb_surf, (width * 701 / 1280, height * 601 / 720))
+            ldb_rect = ldb_surf.get_rect(center = (width/2, height/2))
+
+            noti_surf = pygame.transform.scale(self.noti_surf, (width * 501 / 1280, height * 301/ 720))
+            noti_rect = noti_surf.get_rect(center = (width/2, height/2))
+
+            cam_surf = pygame.transform.scale(self.cam_surf, (width * 69 / 1280, height * 69 / 720))
+            cam_rect = cam_surf.get_rect(topleft = (width * 297 / 320, height * 7 / 240))
+
+            ocr_surf = pygame.transform.scale(self.ocr_surf, (width * 69 / 1280, height * 69 / 720))
+            ocr_rect = ocr_surf.get_rect(topleft = (width * 1189 / 1280, height * 114 / 720))
+            
+            ok_surf = pygame.transform.scale(self.ok_surf, (width * 357 / 1280, height * 109 / 720))
+            ok_rect = ok_surf.get_rect(center = (width/2, height/2 + height * 35 / 144))
+
             if self.stage:
-                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
-                screen.blit(self.stage_surf, self.stage_rect)
-                screen.blit(self.button1_surf, self.button1_rect)
-                screen.blit(self.cam_surf, self.cam_rect)
+                screen.blit(stage_bg_surf, stage_bg_rect)
+                screen.blit(stage_surf, stage_rect)
+                screen.blit(button1_surf, button1_rect)
+                screen.blit(cam_surf, cam_rect)
                 if self.car1.final_rank1 == 5:
                     first_surf = pygame.image.load(f'{normal_1[0]}').convert_alpha()
                     first_surf = pygame.transform.scale(first_surf, (width * 13 / 256, height * 13 / 144))
@@ -557,132 +663,184 @@ class AfterRace():
                 screen.blit(third_surf, third_rect)
              
             if self.ldb:
-                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
-                screen.blit(self.ldb_surf, self.ldb_rect)
-                screen.blit(self.button2_surf, self.button2_rect)
-                screen.blit(self.cam_surf, self.cam_rect)
-                screen.blit(self.ocr_surf, self.ocr_rect)
+                screen.blit(stage_bg_surf, stage_bg_rect)
+                screen.blit(ldb_surf, ldb_rect)
+                screen.blit(button2_surf, button2_rect)
+                screen.blit(cam_surf, cam_rect)
+                screen.blit(ocr_surf, ocr_rect)
                 for i in range(5):
+                    print(self.leaderboard.ranking[i].order)
                     img_surf = pygame.image.load(f'{normal_1[self.leaderboard.ranking[i].order]}').convert_alpha()
                     img_surf = pygame.transform.scale(img_surf, (width * 15 /128, height * 5 / 72))
                     img_rect = img_surf.get_rect(center = (width * 55 / 128, height * 55 / 144 + i * height * 5 / 48))
-                    screen.blit(img_surf, img_rect)
-                    text_surf = font.render(f'{self.cars_name[self.leaderboard.ranking[i].order]}', False, 'Red')
-                    text_rect = text_surf.get_rect(center = (width * 35 / 64, height * 55 / 144 + i * height * 5 / 48))
-                    screen.blit(text_surf, text_rect)
+                    
+                    text1_surf = font.render(f'{self.cars_name[self.leaderboard.ranking[i].order]}', False, 'Red')
+                    text1_rect = text1_surf.get_rect(center = (width * 35 / 64, height * 55 / 144 + i * height * 5 / 48))
+                    
                     text_surf = font.render(f'{self.leaderboard.ranking[i].time}ms', False, 'Red')
                     text_rect = text_surf.get_rect(center = (width * 85 / 128, height * 55 / 144 + i * height * 5 / 48))
+                    
+                    if self.chosen_car - 1 == self.leaderboard.ranking[i].order:
+                        hightlight_rect = (img_rect.left, img_rect.top, text_rect.right - img_rect.left, img_rect.bottom - img_rect.top)
+                        highlight = pygame.draw.rect(screen,'Yellow', hightlight_rect)
+
+                    screen.blit(img_surf, img_rect)
+                    screen.blit(text1_surf, text1_rect)
                     screen.blit(text_surf, text_rect)
-            
+                    
+                print('-----', self.chosen_car)
             if self.noti:
-                screen.blit(self.stage_bg_surf, self.stage_bg_rect)
-                screen.blit(self.noti_surf, self.noti_rect)
-                screen.blit(self.cam_surf, self.cam_rect)
-                screen.blit(self.ok_surf, self.ok_rect)
-                text_surf = font.render('THÔNG BÁO', False, 'Red')
+                screen.blit(stage_bg_surf, stage_bg_rect)
+                screen.blit(noti_surf, noti_rect)
+                screen.blit(cam_surf, cam_rect)
+                screen.blit(self.ok_surf, ok_rect)
+                if self.language == 'VN':
+                    text_surf = font.render('THÔNG BÁO', False, 'Red')
+                else:
+                    text_surf = font.render('NOTIFICATION', False, 'Red')
                 text_surf = pygame.transform.scale_by(text_surf, 2)
-                text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height / 6))
+                text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height / 6))
                 screen.blit(text_surf, text_rect)
                 if self.car1.final_rank1 == 5 and self.chosen_car == 1:
-                    text_surf = font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU WON THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_x2:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted * 2}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
 
                 elif self.car2.final_rank1 == 5 and self.chosen_car == 2:
-                    text_surf = font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU WON THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_x2:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted * 2}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
                     
                 elif self.car3.final_rank1 == 5 and self.chosen_car == 3:
-                    text_surf = font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU WON THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_x2:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted * 2}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
 
                 elif self.car4.final_rank1 == 5 and self.chosen_car == 4:
-                    text_surf = font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU WON THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_x2:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted * 2}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
 
                 elif self.car5.final_rank1 == 5 and self.chosen_car == 5:
-                    text_surf = font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THẮNG CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU WON THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_x2:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted * 2}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted * 2}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN NHẬN ĐƯỢC {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU RECIVED {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
 
                 else:
                     state = 'Lose'
-                    text_surf = font.render('BẠN ĐÃ THUA CƯỢC', False, 'Red')
-                    text_surf = pygame.transform.scale_by(text_surf, 2)
-                    text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72))
+                    if self.language == 'VN':
+                        text_surf = noti_font.render('BẠN ĐÃ THUA CƯỢC', False, 'Red')
+                    else:
+                        text_surf = noti_font.render('YOU LOST THE BET', False, 'Red')
+                    text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72))
                     screen.blit(text_surf, text_rect)
                     if self.item_sale:
-                        text_surf = font.render(f'BẠN MẤT {int(self.coin_betted / 2)}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN MẤT {int(self.coin_betted / 2)}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU LOST {int(self.coin_betted / 2)}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     else:
-                        text_surf = font.render(f'BẠN MẤT {self.coin_betted}', False, 'Red')
-                        text_surf = pygame.transform.scale_by(text_surf, 2)
-                        text_rect = text_surf.get_rect(center = (self.noti_rect.centerx, self.noti_rect.centery - height * 5 /72 + 50))
+                        if self.language == 'VN':
+                            text_surf = noti_font.render(f'BẠN MẤT {self.coin_betted}', False, 'Red')
+                        else:
+                            text_surf = noti_font.render(f'YOU LOST {self.coin_betted}', False, 'Red')
+                        text_rect = text_surf.get_rect(center = (noti_rect.centerx, noti_rect.centery - height * 5 /72 + 50))
                     screen.blit(text_surf, text_rect)
-                
+            
             pygame.display.update()
             clock.tick(60)
 
 
 
 class Racing():
-    def __init__(self, cars_name, map_number, chosen_car, coin_betted, item_speed, item_x2, item_sale):
+    def __init__(self, cars_name, map_number, chosen_car, coin_betted, item_speed, item_x2, item_sale, history_index, history_profit, language):
         global width, height
         width, height = screen.get_size()
+        self.language = language
+        # init history
+        self.history_index = history_index
+        self.history_profit= history_profit
 
         # init shop item
         self.item_speed = item_speed
@@ -701,7 +859,7 @@ class Racing():
 
         # assign the names into the game
         self.cars_name = cars_name
-        self.leaderboard = Leaderboard(self.cars_name, self.chosen_car, self.item_speed)
+        self.leaderboard = Leaderboard(self.cars_name, self.chosen_car, self.item_speed, self.language)
 
         # init the background
         self.bg = Background(map_number)
@@ -731,6 +889,11 @@ class Racing():
         # notification
         self.noti_surf = pygame.image.load('notification.png').convert_alpha()
         self.noti_rect = self.noti_surf.get_rect(center = (width/2, height/2))
+
+        # Sound
+        self.sound = pygame.mixer.Sound(f'map{map_number}.mp3')
+        self.sound.play(-1)
+        self.winner_sound = pygame.mixer.Sound('winner_sound.mp3')
 
 
     # timer
@@ -778,18 +941,44 @@ class Racing():
             print(self.car1.finish, self.car2.finish, self.car3.finish, self.car4.finish, self.car5.finish)
             # blit stage and leaderboard
             if(self.car1.finish and self.car2.finish and self.car3.finish and self.car4.finish and self.car5.finish):
-                self.after = AfterRace(self.car1, self.car2, self.car3, self.car4,self.car5, self.leaderboard, self.chosen_car, self.coin_betted, self.cars_name, self.item_speed, self.item_x2, self.item_sale)
+                self.sound.stop()
+                self.winner_sound.play(0)
+                self.after = AfterRace(self.car1, self.car2, self.car3, self.car4,self.car5, self.leaderboard, self.chosen_car, self.coin_betted, self.cars_name, self.item_speed, self.item_x2, self.item_sale, self.history_index, self.history_profit, self.language)
                 global final_rank2
                 final_rank2 = 5
                 if self.after.run():
                     if self.item_x2:
+                        if len(self.history_profit) < 3:
+                            self.history_profit.append(self.coin_betted * 2)
+                        else:
+                            self.history_profit[0] = self.history_profit[1]
+                            self.history_profit[1] = self.history_profit[2]
+                            self.history_profit[2] = self.coin_betted * 2
                         return self.coin_betted * 2
                     else:
+                        if len(self.history_profit) < 3:
+                            self.history_profit.append(self.coin_betted)
+                        else:
+                            self.history_profit[0] = self.history_profit[1]
+                            self.history_profit[1] = self.history_profit[2]
+                            self.history_profit[2] = self.coin_betted
                         return self.coin_betted
                 else:
                     if self.item_sale:
+                        if len(self.history_profit) < 3:
+                            self.history_profit.append(-int(self.coin_betted / 2))
+                        else:
+                            self.history_profit[0] = self.history_profit[1]
+                            self.history_profit[1] = self.history_profit[2]
+                            self.history_profit[2] = -int(self.coin_betted / 2)
                         return - int(self.coin_betted/2)
                     else:
+                        if len(self.history_profit) < 3:
+                            self.history_profit.append(-self.coin_betted)
+                        else:
+                            self.history_profit[0] = self.history_profit[1]
+                            self.history_profit[1] = self.history_profit[2]
+                            self.history_profit[2] = -self.coin_betted
                         return -self.coin_betted
                 
             pygame.display.update()

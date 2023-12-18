@@ -10,6 +10,18 @@ from email.mime.multipart import MIMEMultipart
 from pygame import *
 import pickle
 
+class Player:
+    def __init__(self, name):
+        self.name = name
+        if self.name == 'Admin':
+            self.money = 99999
+        else:
+            self.money = 400
+        self.history_index = []
+        self.history_profit = []
+        self.item_sale = 0
+        self.item_x2 = 0
+        self.item_speed = 0
 
 class FaceRecognitionApp:
     def __init__(self):
@@ -21,7 +33,7 @@ class FaceRecognitionApp:
 
         self.screen = tk.Tk()
         self.screen.geometry("1280x720")
-        self.screen.title("anhtruongncc")
+        self.screen.title("Login")
     def register_face1(self):
         username = self.register_username_entry.get()
         if os.path.exists(f"data/{username}.jpg"):
@@ -36,10 +48,10 @@ class FaceRecognitionApp:
         capture = cv2.VideoCapture(0)
         while True:
             ret, frame = capture.read()
-            cv2.imshow('Press space to capture', frame)
+            cv2.imshow('Camera', frame)
             if cv2.waitKey(1) & 0xFF == ord(' '):
                 break
-        cv2.destroyWindow('Press space to capture')
+        cv2.destroyWindow('Camera')
         capture.release()
 
         cv2.imwrite(f"data/{username}.jpg", frame)
@@ -48,10 +60,10 @@ class FaceRecognitionApp:
         with open('data.pickle', 'rb') as file:
             data = pickle.load(file)
         # add player information into pickle (database)
-        data.append({f'{username}': 400})
+        data.append(Player(f'{username}'))
         with open('data.pickle', 'wb') as file:
             pickle.dump(data, file)
-        self.screen4.destroy()
+        # self.screen4.destroy()
 
     def login_verify1(self):
         username = self.login_username_entry.get()
@@ -62,10 +74,10 @@ class FaceRecognitionApp:
         capture = cv2.VideoCapture(0)
         while True:
             ret, frame = capture.read()
-            cv2.imshow('Press space to capture', frame)
+            cv2.imshow('Camera', frame)
             if cv2.waitKey(1) & 0xFF == ord(' '):
                 break
-        cv2.destroyWindow('Press space to capture')
+        cv2.destroyWindow('Camera')
         capture.release()
 
         known_image = face_recognition.load_image_file(f"data/{username}.jpg")
@@ -180,10 +192,10 @@ class FaceRecognitionApp:
             with open('data.pickle', 'rb') as file:
                 data = pickle.load(file)
             # add player information into pickle (database)
-            data.append({f'{username}': 400})
+            data.append(Player(f'{username}'))
             with open('data.pickle', 'wb') as file:
                 pickle.dump(data, file)
-            self.screen1.destroy()
+            # self.screen1.destroy()
 
     def window_register(self):
         self.screen1 = Toplevel(self.screen2)

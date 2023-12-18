@@ -1,13 +1,17 @@
-from Settings import *
+from random import choice
+import Settings
 from Racing import Racing
+import pygame
+
 class Game:
-    def __init__(self, map_number, user_coin, item_speed, item_x2, item_sale):
+    def __init__(self, map_number, user_coin, item_speed, item_x2, item_sale, history_index, history_profit, language):
         pygame.init()
         pygame.display.set_caption('US88')
-        self.display_surface = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+        self.display_surface = pygame.display.set_mode((Settings.WINDOW_WIDTH, Settings.WINDOW_HEIGHT), pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
         self.width, self.height = self.display_surface.get_size()
         self.font = pygame.font.Font("CSFONT-TwistyPixel.ttf", round(self.width * 5 / 128))
+        self.language = language
         # Name for random choices
         self.Name = ['Hawkeye', 'Loki', 'Daredevil', 'Storm', 'Ultron', 'Groot', 'Magneto', 'Wanda', 'Wasp',
          'Shang-Chi', 'Yondu', 'Thanos', 'Hulk', 'X-Men', 'Nebula', 'Thor', 'Dr. Strange']
@@ -17,7 +21,11 @@ class Game:
         self.cars_image_list = []
         self.cars_rect_list = []
 
-        self.cars_name_list = ['Bí danh: ', 'Bí danh: ', 'Bí danh: ', 'Bí danh: ', 'Bí danh: ']
+        if (self.language == 'VN'):
+            self.cars_name_list = ['Tên: ', 'Tên: ', 'Tên: ', 'Tên: ', 'Tên: ']
+        else:
+            self.cars_name_list = ['Name:', 'Name:', 'Name:', 'Name:', 'Name:']
+
         self.current_opponent = 0
         # self.name_x = self.width * 7 / 64
 
@@ -59,6 +67,11 @@ class Game:
         self.item_speed = item_speed
         self.item_x2 = item_x2
         self.item_sale = item_sale
+        self.history_index = history_index
+        self.history_profit = history_profit
+
+        self.sound = pygame.mixer.Sound('game_sound.mp3')
+        self.sound.play(-1)
 
     def display_cursor(self):
         self.cursor_img_rect = pygame.mouse.get_pos()
@@ -71,21 +84,28 @@ class Game:
             self.display_surface.fill((0, 0, 0))
             self.display_surface.blit(self.bg, (0, 0))
             cars_x = self.width * 7 / 64
+            
+            if self.language == 'VN':
+                text = self.font.render('HÃY CHỌN CHIẾN MÃ CỦA BẠN', False, 'Red')
+            else:
+                text = self.font.render('CHOOSE YOUR CHARACTER', False, 'Red')
 
-            text = self.font.render('HÃY CHỌN CHIẾN MÃ CỦA BẠN', False, 'Red')
             text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
             self.display_surface.blit(text, text_rect)
            
             self.cars_rect_list = []
-            for i in range(1, CARS + 1):                
-                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
+            for i in range(1, Settings.CARS + 1):     
+                if self.map == 1:
+                    cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal1.png').convert_alpha(), (self.width * 67 / 1280, self.height * 122 / 720))
+                else:
+                    cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal1.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
                 cars_rect = cars_image.get_rect(center = (cars_x, self.height / 2))
-                if len(self.cars_rect_list) != CARS:
+                if len(self.cars_rect_list) != Settings.CARS:
                     self.cars_image_list.append(cars_image)
                     self.cars_rect_list.append(cars_rect)
                 self.display_surface.blit(cars_image, cars_rect)
 
-                cars_x += (self.width - self.width * 7 / 32) / (CARS - 1)
+                cars_x += (self.width - self.width * 7 / 32) / (Settings.CARS - 1)
 
         if self.car > 0 and self.chose_car == False:
             # self.cars_image_list[self.car - 1] = pygame.transform.scale(pygame.image.load(f'xe{self.car}.png').convert_alpha(), (100, 65))
@@ -97,8 +117,12 @@ class Game:
         if self.chose_car and self.changed_name == False:
             self.cars_image_list = []
 
-            for i in range(1, CARS + 1):                
-                cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
+            for i in range(1, Settings.CARS + 1):                
+                if self.map == 1:
+                    cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal1.png').convert_alpha(), (self.width * 67 / 1280, self.height * 122 / 720))
+                else:
+                    cars_image = pygame.transform.scale(pygame.image.load(f'sets/set{self.map}/cars/car{i}/normal1.png').convert_alpha(), (self.width * 5 / 64, self.height * 13 / 144))
+
                 self.cars_image_list.append(cars_image)
 
             self.display_surface.fill((0, 0, 0))
@@ -106,11 +130,22 @@ class Game:
             cars_x = self.width * 7 / 64
             name_x = self.width * 7 / 64
 
-            text = self.font.render('HÃY CHỌN BÍ DANH CHO BẢN THÂN VÀ CÁC ĐỐI THỦ', False, 'Red')
+            if self.language == 'VN':
+                text = self.font.render('HÃY CHỌN BÍ DANH CHO BẢN THÂN VÀ CÁC ĐỐI THỦ', False, 'Red')
+                note1 = self.font.render('(Nhấn enter để chọn ngẫu nhiên tên nhân vật', False, 'White')
+                note2 = self.font.render('và nhấn enter sau khi đặt tên xong)', False, 'White')
+            else:
+                text = self.font.render("INPUT YOUR CHARACTER'S NAME AND YOUR OPPONENTS' NAMES", False, 'Red')
+                note1 = self.font.render("(Press enter to random characters' names", False, 'White')
+                note2 = self.font.render("and press enter when finish)", False, 'White')
             text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
+            note1_rect = note1.get_rect(center = (self.width / 2, self.height * 140 / 720))
+            note2_rect = note2.get_rect(center = (self.width / 2, self.height * 170 / 720))
             self.display_surface.blit(text, text_rect)
+            self.display_surface.blit(note1, note1_rect)
+            self.display_surface.blit(note2, note2_rect)
              
-            for i in range(CARS):
+            for i in range(Settings.CARS):
             
                 cars_image = self.cars_image_list[i]
                 name_surface = self.font.render(self.cars_name_list[i], True, (255, 255, 255))
@@ -122,19 +157,22 @@ class Game:
                 self.display_surface.blit(name_surface, name_rect)
 
                 if i == self.car - 1:
-                    pygame.draw.rect(self.display_surface, COLOR, cars_rect, 1)
+                    limelight = pygame.image.load('limelight.png').convert_alpha()
+                    limelight_rect = limelight.get_rect(center = (cars_x, self.height * 7 / 18))
+                    self.display_surface.blit(limelight, limelight_rect)
+                    # pygame.draw.rect(self.display_surface, Settings.COLOR, cars_rect, 1)
                 
-                cars_x += (self.width - self.width * 7 / 32) / (CARS - 1)
+                cars_x += (self.width - self.width * 7 / 32) / (Settings.CARS - 1)
 
-            for i in range(CARS):
+            for i in range(Settings.CARS):
 
                 if i == self.current_opponent:
 
                     name_surface = self.font.render(self.cars_name_list[self.current_opponent], True, (255, 255, 255))
 
-                    name_rect = name_surface.get_rect(center = (name_x + (self.width - self.width * 7 / 32) / (CARS - 1) * i, self.height * 25 / 36))
+                    name_rect = name_surface.get_rect(center = (name_x + (self.width - self.width * 7 / 32) / (Settings.CARS - 1) * i, self.height * 25 / 36))
 
-                    pygame.draw.rect(self.display_surface, COLOR, name_rect, 2)
+                    pygame.draw.rect(self.display_surface, Settings.COLOR, name_rect, 2)
                                 
                     self.display_surface.blit(name_surface, name_rect)
 
@@ -148,11 +186,14 @@ class Game:
             self.display_surface.blit(self.bg, (0, 0))
             coins_x = self.width * 7 / 64
 
-            text = self.font.render('HÃY CHỌN MỨC CƯỢC THÔI NÀO', False, 'Red')
+            if self.language == 'VN':
+                text = self.font.render('HÃY CHỌN MỨC CƯỢC THÔI NÀO', False, 'Red')
+            else:
+                text = self.font.render('CHOOSE YOUR BET LEVEL', False, 'Red')
             text_rect = text.get_rect(center = (self.width / 2, self.height * 5 / 36))
             self.display_surface.blit(text, text_rect)
            
-            for i in range(1, COINS + 1):                
+            for i in range(1, Settings.COINS + 1):                
                 coins_image = pygame.transform.scale(pygame.image.load(f'coins/coin{i}.png').convert_alpha(), (self.width * 5 / 64, self.height / 9))
                 coins_rect = coins_image.get_rect(center = (coins_x, self.height / 2))
 
@@ -165,7 +206,7 @@ class Game:
                 self.display_surface.blit(coins_image, coins_rect)
                 self.display_surface.blit(price_surface, price_rect)
 
-                coins_x += (self.width - self.width * 7 / 32) / (COINS - 1)
+                coins_x += (self.width - self.width * 7 / 32) / (Settings.COINS - 1)
 
         if self.coin_betted >= 100 and self.coin_betted <= self.coin and self.chose_coin == False:
             self.chose_coin = True
@@ -201,24 +242,24 @@ class Game:
                     # Input name for each car
                     if self.chose_car and self.changed_opponents == False:
 
-                        if event.key == pygame.K_BACKSPACE and len(self.cars_name_list[self.current_opponent]) >= 10:
+                        if event.key == pygame.K_BACKSPACE and len(self.cars_name_list[self.current_opponent]) >= 6:
                             self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][:-1]
 
                         elif event.key == pygame.K_RETURN and self.enter:
-                            self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][9:]
+                            self.cars_name_list[self.current_opponent] = self.cars_name_list[self.current_opponent][5:]
                                                          
                             if len(self.cars_name_list[self.current_opponent]) == 0:
                                 self.cars_name_list[self.current_opponent] = choice(self.Name)
                                 self.Name.remove(self.cars_name_list[self.current_opponent])
                                 
 
-                            # self.name_x += (self.width - self.width * 7 / 32) / (CARS - 1)
+                            # self.name_x += (self.width - self.width * 7 / 32) / (Settings.CARS - 1)
 
                             self.current_opponent += 1
 
                             self.enter = False
 
-                            if self.current_opponent == CARS:
+                            if self.current_opponent == Settings.CARS:
                                 self.changed_opponents = True
 
                         elif len(self.cars_name_list[self.current_opponent]) < 22:
@@ -238,7 +279,8 @@ class Game:
                 self.change_name()
                 self.bet_money()
             else:
-                return Racing(self.cars_name_list, self.map, self.car, self.coin_betted, self.item_speed, self.item_x2, self.item_sale).run()
+                self.sound.stop()
+                return Racing(self.cars_name_list, self.map, self.car, self.coin_betted, self.item_speed, self.item_x2, self.item_sale, self.history_index, self.history_profit, self.language).run()
                 
                 
 
